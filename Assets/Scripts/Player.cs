@@ -6,6 +6,8 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private float velocity;
+    [Range(3, 15)]
+    [SerializeField]
     private float maxVelocity;
 
     private float horizontalRotationSpeed;
@@ -16,13 +18,13 @@ public class Player : MonoBehaviour
     private GameObject periscope;
     private Light leftLight;
     private Light rightLight;
-    private float periscopeLightMaxIntensity = 7f;
-    private float additionalLightsMaxIntensity = 4f;
+    private readonly float periscopeLightMaxIntensity = 7f;
+    private readonly float additionalLightsMaxIntensity = 4f;
 
     void Start()
     {
         velocity = 0f;
-        maxVelocity = 5f;
+        maxVelocity = 4f;
 
         horizontalRotationSpeed = 0f;
         verticalRotationSpeed = 0f;
@@ -70,7 +72,7 @@ public class Player : MonoBehaviour
         if (verticalRotationSpeed > maxRotationSpeed) verticalRotationSpeed = maxRotationSpeed;
         else if (verticalRotationSpeed < -maxRotationSpeed) verticalRotationSpeed = -maxRotationSpeed;
         else if (verticalRotationSpeed < 1 && verticalRotationSpeed > -1) verticalRotationSpeed = 0;
-
+        
         // Apply movement to position and rotation
         if (velocity != 0) transform.position += Time.deltaTime * velocity * transform.forward;
         transform.Rotate(new Vector3(verticalRotationSpeed, horizontalRotationSpeed, 0) * Time.deltaTime);
