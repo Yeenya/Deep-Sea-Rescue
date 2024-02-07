@@ -1,7 +1,7 @@
-using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
@@ -18,8 +18,16 @@ public class Player : MonoBehaviour
     private GameObject periscope;
     private Light leftLight;
     private Light rightLight;
-    private readonly float periscopeLightMaxIntensity = 7f;
-    private readonly float additionalLightsMaxIntensity = 4f;
+    private readonly float periscopeLightMaxIntensity = 4f;
+    private readonly float additionalLightsMaxIntensity = 2f;
+
+    private float electricity = 600f;
+    private bool mainLightOn = false;
+    private bool leftLightOn = false;
+    private bool rightLightOn = false;
+
+    [SerializeField]
+    private ParticleSystem terrainParticles;
 
     void Start()
     {
@@ -38,8 +46,10 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (electricity <= 0) return;
         MoveSubmarine();
         CheckInput();
+        DrainElectricity();
     }
 
     private void MoveSubmarine()
@@ -111,17 +121,40 @@ public class Player : MonoBehaviour
             periscopeLight.DOIntensity(0, 0.5f);
             periscope.GetComponent<MeshRenderer>().material.DisableKeyword("_EMISSION");
         }
+
+        mainLightOn = !mainLightOn;
     }
 
     private void ChangeLeftLight()
     {
         if (leftLight.intensity == 0) leftLight.DOIntensity(additionalLightsMaxIntensity, 0.5f);
         else leftLight.DOIntensity(0, 0.5f);
+        leftLightOn = !leftLightOn;
     }
 
     private void ChangeRightLight()
     {
         if (rightLight.intensity == 0) rightLight.DOIntensity(additionalLightsMaxIntensity, 0.5f);
         else rightLight.DOIntensity(0, 0.5f);
+        rightLightOn = !rightLightOn;
+    }
+
+    private void DrainElectricity()
+    {
+        float coefficient = 1;
+        if (mainLightOn) coefficient += 1;
+        if (leftLightOn) coefficient += 0.5f;
+        if (rightLightOn) coefficient += 0.5f;
+        electricity -= Time.deltaTime * coefficient;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Terrain")) terrainParticles.Play();
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Terrain")) terrainParticles.Stop();
     }
 }

@@ -8,6 +8,7 @@ TagManager:
   - Periscope
   - Right Light
   - Left Light
+  - Terrain
   layers:
   - Default
   - TransparentFX
