@@ -41,6 +41,7 @@ public class CameraController : MonoBehaviour
         if (!insideOrOutside)
         {
             Camera.main.fieldOfView = fovOutside;
+            transform.position = player.transform.position + cameraOffset;
         }
         else
         {

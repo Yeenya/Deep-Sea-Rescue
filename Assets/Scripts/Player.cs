@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
     private float maxRotationSpeed;
 
     private GameObject rotor;
-    private GameObject periscope;
+    private Light periscopeLight;
     private Light leftLight;
     private Light rightLight;
     private readonly float periscopeLightMaxIntensity = 4f;
@@ -27,7 +27,13 @@ public class Player : MonoBehaviour
     private bool rightLightOn = false;
 
     [SerializeField]
+    private AudioSource rotorSound;
+
+    [SerializeField]
     private ParticleSystem terrainParticles;
+
+    [SerializeField]
+    private AudioSource terrainDragSound;
 
     void Start()
     {
@@ -39,17 +45,23 @@ public class Player : MonoBehaviour
         maxRotationSpeed = 50f;
 
         rotor = GameObject.FindGameObjectWithTag("Rotor");
-        periscope = GameObject.FindGameObjectWithTag("Periscope");
+        periscopeLight = GameObject.FindGameObjectWithTag("Periscope").GetComponentInChildren<Light>();
         leftLight = GameObject.FindGameObjectWithTag("Left Light").GetComponent<Light>();
         rightLight = GameObject.FindGameObjectWithTag("Right Light").GetComponent<Light>();
+
+        periscopeLight.intensity = 0;
+        leftLight.intensity = 0;
+        rightLight.intensity = 0;
     }
 
     void Update()
     {
         if (electricity <= 0) return;
         MoveSubmarine();
+        ConstrainMove();
         CheckInput();
         DrainElectricity();
+        RotorAudio();
     }
 
     private void MoveSubmarine()
@@ -94,9 +106,18 @@ public class Player : MonoBehaviour
         if (correctRotation.x < 280 && correctRotation.x > 180) correctRotation.x = 280;
         transform.rotation = Quaternion.Euler(correctRotation);
 
-        rotor.transform.Rotate(0, 0.5f + velocity * 0.5f, 0);
+        rotor.transform.Rotate(0, 0.5f + velocity * 2f, 0);
 
         GetComponent<Rigidbody>().velocity = Vector3.zero;
+    }
+
+    private void ConstrainMove()
+    {
+        if (transform.position.x > 490) GetComponent<Rigidbody>().AddForce(-Vector3.right);
+        else if (transform.position.x < 10) GetComponent<Rigidbody>().AddForce(Vector3.right);
+
+        if (transform.position.z > 490) GetComponent<Rigidbody>().AddForce(-Vector3.forward);
+        else if (transform.position.z < 10) GetComponent<Rigidbody>().AddForce(Vector3.forward);
     }
 
     private void CheckInput()
@@ -110,16 +131,15 @@ public class Player : MonoBehaviour
 
     private void ChangeMainLight()
     {
-        Light periscopeLight = periscope.GetComponentInChildren<Light>();
         if (periscopeLight.intensity == 0)
         {
             periscopeLight.DOIntensity(periscopeLightMaxIntensity, 0.5f);
-            periscope.GetComponent<MeshRenderer>().material.EnableKeyword("_EMISSION");
+            periscopeLight.transform.parent.GetComponent<MeshRenderer>().material.EnableKeyword("_EMISSION");
         }
         else
         {
             periscopeLight.DOIntensity(0, 0.5f);
-            periscope.GetComponent<MeshRenderer>().material.DisableKeyword("_EMISSION");
+            periscopeLight.transform.parent.GetComponent<MeshRenderer>().material.DisableKeyword("_EMISSION");
         }
 
         mainLightOn = !mainLightOn;
@@ -150,11 +170,28 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Terrain")) terrainParticles.Play();
+        if (collision.gameObject.CompareTag("Terrain"))
+        {
+            terrainParticles.Play();
+            terrainDragSound.DOFade(1, 1);
+        }
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Terrain")) terrainParticles.Stop();
+        if (collision.gameObject.CompareTag("Terrain"))
+        {
+            terrainParticles.Stop();
+            terrainDragSound.DOFade(0, 1);
+        }
+    }
+
+    private void RotorAudio()
+    {
+        if (velocity == 0) rotorSound.Stop();
+        else if (!rotorSound.isPlaying) rotorSound.Play();
+
+        rotorSound.pitch = Mathf.Abs(velocity) / maxVelocity;
+        rotorSound.volume = rotorSound.pitch / 2;
     }
 }
