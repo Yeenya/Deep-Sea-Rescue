@@ -9,6 +9,7 @@ TagManager:
   - Right Light
   - Left Light
   - Terrain
+  - Diver
   layers:
   - Default
   - TransparentFX

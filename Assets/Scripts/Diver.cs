@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,20 +8,35 @@ public class Diver : MonoBehaviour
 {
     AudioSource sonarSound;
     private GameObject player;
+    private CameraController cameraController;
 
     void Start()
     {
         sonarSound = GetComponent<AudioSource>();
         sonarSound.Play();
         player = GameObject.FindGameObjectWithTag("Player");
+        cameraController = Camera.main.GetComponent<CameraController>();
     }
 
     void Update()
     {
         float distance = Vector3.Distance(transform.position, player.transform.position);
-        if (distance > sonarSound.maxDistance) sonarSound.volume = 0;
-        else sonarSound.volume = 1;
+        if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
+        else sonarSound.volume = 0;
         float nonModifiedPitch = (sonarSound.maxDistance - distance) / sonarSound.maxDistance;
         sonarSound.pitch = Mathf.Pow(2, 10 * nonModifiedPitch - 10) * 2 + 1;
+    }
+
+    public void GetSaved(Vector3 submarinePosition)
+    {
+        GetComponent<Animator>().SetBool("isRunning", true);
+        transform.DOMove(submarinePosition, 1);
+        StartCoroutine(GetSavedCoroutine());
+    }
+
+    private IEnumerator GetSavedCoroutine()
+    {
+        yield return new WaitForSeconds(1);
+        Destroy(gameObject);
     }
 }

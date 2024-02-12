@@ -48,4 +48,9 @@ public class CameraController : MonoBehaviour
             Camera.main.fieldOfView = fovInside;
         }
     }
+
+    public bool GetInsideOrOutside()
+    {
+        return insideOrOutside;
+    }
 }

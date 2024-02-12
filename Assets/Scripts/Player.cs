@@ -26,6 +26,8 @@ public class Player : MonoBehaviour
     private bool leftLightOn = false;
     private bool rightLightOn = false;
 
+    private int savedDivers = 0;
+
     [SerializeField]
     private AudioSource rotorSound;
 
@@ -127,6 +129,8 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F)) ChangeMainLight();
         if (Input.GetKeyDown(KeyCode.C)) ChangeLeftLight();
         if (Input.GetKeyDown(KeyCode.V)) ChangeRightLight();
+
+        if (Input.GetKeyDown(KeyCode.R)) RescueDiver();
     }
 
     private void ChangeMainLight()
@@ -193,5 +197,19 @@ public class Player : MonoBehaviour
 
         rotorSound.pitch = Mathf.Abs(velocity) / maxVelocity;
         rotorSound.volume = rotorSound.pitch / 2;
+    }
+
+    private void RescueDiver()
+    {
+        GameObject[] divers = GameObject.FindGameObjectsWithTag("Diver");
+        foreach(GameObject diver in divers)
+        {
+            if (Vector3.Distance(diver.transform.position, transform.position) < 10f)
+            {
+                diver.GetComponent<Diver>().GetSaved(terrainParticles.transform.position);
+                savedDivers++;
+                break;
+            }
+        }
     }
 }
