@@ -29,6 +29,6 @@ public class DepthMeter : MonoBehaviour
         currentColor.g = upperBoundColor.g * (currentDepth / depthInterval);
         currentColor.b = upperBoundColor.b * (currentDepth / depthInterval);
         depthMaterial.color = currentColor;
-        print(currentDepth / depthInterval);
+        //print(currentDepth / depthInterval);
     }
 }

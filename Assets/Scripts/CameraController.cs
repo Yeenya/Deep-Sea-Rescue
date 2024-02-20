@@ -10,6 +10,7 @@ public class CameraController : MonoBehaviour
     private bool insideOrOutside;
     private float fovOutside;
     private float fovInside;
+    private Vector3 insideRotation;
 
     void Start()
     {
@@ -18,6 +19,7 @@ public class CameraController : MonoBehaviour
         insideOrOutside = false;
         fovOutside = GetComponent<Camera>().fieldOfView;
         fovInside = 105f;
+        insideRotation = Vector3.zero;
     }
     
     void Update()
@@ -31,7 +33,17 @@ public class CameraController : MonoBehaviour
         }
         else
         {
+            insideRotation.x -= Input.GetAxis("Mouse Y");
+            insideRotation.y += Input.GetAxis("Mouse X");
+
+            if (insideRotation.x > 90) insideRotation.x = 90;
+            else if (insideRotation.x < -90) insideRotation.x = -90;
+
+            if (insideRotation.y > 90) insideRotation.y = 90;
+            else if (insideRotation.y < -90) insideRotation.y = -90;
+
             transform.SetPositionAndRotation(insideSpot.position, insideSpot.rotation);
+            transform.localRotation *= Quaternion.Euler(insideRotation);
         }
     }
 
@@ -41,11 +53,15 @@ public class CameraController : MonoBehaviour
         if (!insideOrOutside)
         {
             Camera.main.fieldOfView = fovOutside;
-            transform.position = player.transform.position + cameraOffset;
+            transform.SetPositionAndRotation(player.transform.position + cameraOffset, player.transform.rotation);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
         else
         {
             Camera.main.fieldOfView = fovInside;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
     }
 

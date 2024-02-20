@@ -10,6 +10,7 @@ TagManager:
   - Left Light
   - Terrain
   - Diver
+  - TiltModel
   layers:
   - Default
   - TransparentFX

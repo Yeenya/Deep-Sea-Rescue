@@ -24,7 +24,7 @@ public class Diver : MonoBehaviour
         if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
         else sonarSound.volume = 0;
         float nonModifiedPitch = (sonarSound.maxDistance - distance) / sonarSound.maxDistance;
-        sonarSound.pitch = Mathf.Pow(2, 10 * nonModifiedPitch - 10) * 2 + 1;
+        sonarSound.pitch = (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 2 + 1; //easeInSine from https://easings.net/#easeInSine
     }
 
     public void GetSaved(Vector3 submarinePosition)

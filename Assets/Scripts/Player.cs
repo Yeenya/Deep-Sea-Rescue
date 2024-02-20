@@ -37,6 +37,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioSource terrainDragSound;
 
+    [SerializeField]
+    private GameObject tiltModel;
+
     void Start()
     {
         velocity = 0f;
@@ -54,6 +57,8 @@ public class Player : MonoBehaviour
         periscopeLight.intensity = 0;
         leftLight.intensity = 0;
         rightLight.intensity = 0;
+
+        tiltModel = GameObject.FindGameObjectWithTag("TiltModel");
     }
 
     void Update()
@@ -89,8 +94,8 @@ public class Player : MonoBehaviour
         else if (horizontalRotationSpeed < 1 && horizontalRotationSpeed > -1) horizontalRotationSpeed = 0;
 
         // Up/down
-        if (Input.GetKey(KeyCode.LeftShift)) verticalRotationSpeed += 1f;
-        else if (Input.GetKey(KeyCode.Space)) verticalRotationSpeed -= 1f;
+        if (Input.GetKey(KeyCode.LeftControl)) verticalRotationSpeed += 1f;
+        else if (Input.GetKey(KeyCode.LeftShift)) verticalRotationSpeed -= 1f;
         else if (verticalRotationSpeed != 0) verticalRotationSpeed -= Mathf.Sign(verticalRotationSpeed);
 
         if (verticalRotationSpeed > maxRotationSpeed) verticalRotationSpeed = maxRotationSpeed;
@@ -111,6 +116,8 @@ public class Player : MonoBehaviour
         rotor.transform.Rotate(0, 0.5f + velocity * 2f, 0);
 
         GetComponent<Rigidbody>().velocity = Vector3.zero;
+
+        tiltModel.transform.localRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, 0, 0));
     }
 
     private void ConstrainMove()
