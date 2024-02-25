@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using TMPro;
+using Unity.VisualScripting;
 
 public class Player : MonoBehaviour
 {
@@ -21,7 +23,8 @@ public class Player : MonoBehaviour
     private readonly float periscopeLightMaxIntensity = 4f;
     private readonly float additionalLightsMaxIntensity = 2f;
 
-    private float electricity = 600f;
+    public readonly float maxElectricity = 600f;
+    private float electricity;
     private bool mainLightOn = false;
     private bool leftLightOn = false;
     private bool rightLightOn = false;
@@ -39,6 +42,11 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private GameObject tiltModel;
+
+    [SerializeField]
+    private GameObject gameOverMenu;
+
+    public bool gameOver = false;
 
     void Start()
     {
@@ -58,12 +66,18 @@ public class Player : MonoBehaviour
         leftLight.intensity = 0;
         rightLight.intensity = 0;
 
+        electricity = maxElectricity;
+
         tiltModel = GameObject.FindGameObjectWithTag("TiltModel");
     }
 
     void Update()
     {
-        if (electricity <= 0) return;
+        if (electricity <= 0)
+        {
+            GameOver();
+            return;
+        }
         MoveSubmarine();
         ConstrainMove();
         CheckInput();
@@ -218,5 +232,22 @@ public class Player : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private void GameOver()
+    {
+        if (!gameOverMenu.activeSelf)
+        {
+            gameOverMenu.SetActive(true);
+            gameOverMenu.GetComponentInChildren<TextMeshProUGUI>().text = "Game over!\r\n\r\nYou ran out of electricity.\r\n\r\nYou managed to save " + savedDivers + " divers.";
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+            gameOver = true;
+        }
+    }
+
+    public float GetElectricity()
+    {
+        return electricity;
     }
 }

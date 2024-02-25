@@ -42,7 +42,7 @@ public class DepthMeter : MonoBehaviour
 
         if (currentDepth > 170)
         {
-            if (!GetComponent<AudioSource>().isPlaying) GetComponent<AudioSource>().Play();
+            if (!GetComponent<AudioSource>().isPlaying && !player.GetComponent<Player>().gameOver) GetComponent<AudioSource>().Play();
             if (!emissionOn)
             {
                 depthMaterial.EnableKeyword("_EMISSION");
