@@ -57,6 +57,10 @@ public class Player : MonoBehaviour
     string logFilePath;
     StreamWriter writer;
 
+    Vector3 lastPosition;
+    float distance = 0f;
+    float time = 0f;
+
     void Start()
     {
         velocity = 0f;
@@ -82,6 +86,7 @@ public class Player : MonoBehaviour
         logFilePath = Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + ".txt";
         File.WriteAllText(logFilePath, "");
         writer = new StreamWriter(logFilePath);
+        lastPosition = transform.position;
     }
 
     void Update()
@@ -100,7 +105,18 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+        distance += Vector3.Distance(lastPosition, transform.position);
+        lastPosition = transform.position;
+        time += Time.fixedDeltaTime;
         string log = "";
+        log += transform.position + ";";
+        log += distance + ";";
+        log += time + ";";
+        log += transform.rotation + ";";
+        log += Camera.main.transform.localRotation + ";";
+        log += mainLightOn + ";";
+        log += leftLightOn + ";";
+        log += rightLightOn + ";";
         writer.WriteLine(log);
     }
 
