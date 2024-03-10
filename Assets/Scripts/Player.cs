@@ -4,6 +4,9 @@ using UnityEngine;
 using DG.Tweening;
 using TMPro;
 using Unity.VisualScripting;
+using System.IO;
+using System;
+using System.Text;
 
 public class Player : MonoBehaviour
 {
@@ -46,7 +49,13 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject gameOverMenu;
 
+    [SerializeField]
+    private GameObject gameWonMenu;
+
     public bool gameOver = false;
+
+    string logFilePath;
+    StreamWriter writer;
 
     void Start()
     {
@@ -69,6 +78,10 @@ public class Player : MonoBehaviour
         electricity = maxElectricity;
 
         tiltModel = GameObject.FindGameObjectWithTag("TiltModel");
+
+        logFilePath = Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + ".txt";
+        File.WriteAllText(logFilePath, "");
+        writer = new StreamWriter(logFilePath);
     }
 
     void Update()
@@ -83,6 +96,12 @@ public class Player : MonoBehaviour
         CheckInput();
         DrainElectricity();
         RotorAudio();
+    }
+
+    void FixedUpdate()
+    {
+        string log = "";
+        writer.WriteLine(log);
     }
 
     private void MoveSubmarine()
@@ -229,6 +248,12 @@ public class Player : MonoBehaviour
             {
                 diver.GetComponent<Diver>().GetSaved(terrainParticles.transform.position);
                 savedDivers++;
+                if (savedDivers == 5)
+                {
+                    gameWonMenu.SetActive(true);
+                    Time.timeScale = 0f;
+                    gameOver = true;
+                }
                 break;
             }
         }
