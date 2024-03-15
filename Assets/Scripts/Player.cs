@@ -34,6 +34,8 @@ public class Player : MonoBehaviour
 
     private int savedDivers = 0;
 
+    private bool filesWritten = false;
+
     [SerializeField]
     private AudioSource rotorSound;
 
@@ -83,9 +85,6 @@ public class Player : MonoBehaviour
 
         tiltModel = GameObject.FindGameObjectWithTag("TiltModel");
 
-        logFilePath = Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + ".txt";
-        File.WriteAllText(logFilePath, "");
-        writer = new StreamWriter(logFilePath);
         lastPosition = transform.position;
     }
 
@@ -99,25 +98,45 @@ public class Player : MonoBehaviour
         MoveSubmarine();
         ConstrainMove();
         CheckInput();
-        DrainElectricity();
+        //DrainElectricity();
         RotorAudio();
     }
 
     void FixedUpdate()
     {
+        if (!filesWritten) return;
         distance += Vector3.Distance(lastPosition, transform.position);
         lastPosition = transform.position;
         time += Time.fixedDeltaTime;
         string log = "";
-        log += transform.position + ";";
-        log += distance + ";";
-        log += time + ";";
-        log += transform.rotation + ";";
-        log += Camera.main.transform.localRotation + ";";
-        log += mainLightOn + ";";
-        log += leftLightOn + ";";
-        log += rightLightOn + ";";
+        log += Vector3ToString(transform.position) + ",";
+        log += ReplaceDecimal(distance) + ",";
+        log += ReplaceDecimal(time) + ",";
+        log += QuaternionToString(transform.rotation) + ",";
+        log += QuaternionToString(Camera.main.transform.localRotation) + ",";
+        log += mainLightOn + ",";
+        log += leftLightOn + ",";
+        log += rightLightOn + ",";
+        log += savedDivers + ",";
+        log += ReplaceDecimal(electricity);
         writer.WriteLine(log);
+    }
+
+    private string ReplaceDecimal(float number)
+    {
+        return number.ToString().Replace(',', '.');
+    }
+
+    private string Vector3ToString(Vector3 vector)
+    {
+        string result = ReplaceDecimal(vector.x) + "," + ReplaceDecimal(vector.y) + "," + ReplaceDecimal(vector.z);
+        return result;
+    }
+
+    private string QuaternionToString(Quaternion quaternion)
+    {
+        string result = ReplaceDecimal(quaternion.x) + "," + ReplaceDecimal(quaternion.y) + "," + ReplaceDecimal(quaternion.z) + "," + ReplaceDecimal(quaternion.w);
+        return result;
     }
 
     private void MoveSubmarine()
@@ -264,7 +283,7 @@ public class Player : MonoBehaviour
             {
                 diver.GetComponent<Diver>().GetSaved(terrainParticles.transform.position);
                 savedDivers++;
-                if (savedDivers == 5)
+                if (savedDivers == 6)
                 {
                     gameWonMenu.SetActive(true);
                     Time.timeScale = 0f;
@@ -290,5 +309,47 @@ public class Player : MonoBehaviour
     public float GetElectricity()
     {
         return electricity;
+    }
+
+    public void WriteFilesIfNeccessary()
+    {
+        if (filesWritten || GetComponent<ReplayPlayer>().enabled) return;
+        filesWritten = true;
+        if (!Directory.Exists(Application.persistentDataPath + "/Data"))
+        {
+            Directory.CreateDirectory(Application.persistentDataPath + "/Data");
+        }
+        using (writer = new StreamWriter(Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + "_Settings.csv"))
+        {
+            writer.WriteLine(
+                "Submarine Position X,Submarine Position Y,Submarine Position Z," +
+                "Diver1 Position X,Diver1 Position Y,Diver1 Position Z," +
+                "Diver2 Position X,Diver2 Position Y,Diver2 Position Z," +
+                "Diver3 Position X,Diver3 Position Y,Diver3 Position Z," +
+                "Diver4 Position X,Diver4 Position Y,Diver4 Position Z," +
+                "Diver5 Position X,Diver5 Position Y,Diver5 Position Z," +
+                "Testing Diver Position X,Testing Diver Position Y,Testing Diver Position Z");
+            writer.WriteLine(Vector3ToString(transform.position) + ","
+                + Vector3ToString(GameObject.Find("Diver1").transform.position) + ","
+                + Vector3ToString(GameObject.Find("Diver2").transform.position) + ","
+                + Vector3ToString(GameObject.Find("Diver3").transform.position) + ","
+                + Vector3ToString(GameObject.Find("Diver4").transform.position) + ","
+                + Vector3ToString(GameObject.Find("Diver5").transform.position) + ","
+                + Vector3ToString(GameObject.Find("TestingDiver").transform.position));
+        }
+        logFilePath = Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + ".csv";
+        File.WriteAllText(logFilePath, "");
+        writer = new StreamWriter(logFilePath);
+        writer.WriteLine(
+            "Position X,Position Y,Position Z," +
+            "Distance," +
+            "Time," +
+            "Submarine Rotation X,Submarine Rotation Y,Submarine Rotation Z,Submarine Rotation W," +
+            "Camera Rotation X,Camera Rotation Y,Camera Rotation Z,Camera Rotation W," +
+            "Main Light On," +
+            "Left Light On," +
+            "Right Light On," +
+            "Saved Divers," +
+            "Electricity");
     }
 }

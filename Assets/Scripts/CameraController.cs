@@ -33,8 +33,13 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            insideRotation.x -= Input.GetAxis("Mouse Y");
-            insideRotation.y += Input.GetAxis("Mouse X");
+            if (player.GetComponent<ReplayPlayer>().enabled) return;
+
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                insideRotation.x -= Input.GetAxis("Mouse Y");
+                insideRotation.y += Input.GetAxis("Mouse X");
+            }
 
             if (insideRotation.x > 90) insideRotation.x = 90;
             else if (insideRotation.x < -90) insideRotation.x = -90;
