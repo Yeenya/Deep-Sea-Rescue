@@ -9,6 +9,7 @@ public class ElectricityBar : MonoBehaviour
     private Material electricityMaterial;
     private Color fullElectricityColor;
     private bool emissionOn = false;
+    private bool notifiedLowElectricity = false;
 
     void Start()
     {
@@ -35,7 +36,11 @@ public class ElectricityBar : MonoBehaviour
 
         if (currentElectricityClamped <= 0.15f)
         {
-            if (!GetComponent<AudioSource>().isPlaying && !player.gameOver) GetComponent<AudioSource>().Play();
+            if (!notifiedLowElectricity)
+            {
+                GetComponent<AudioSource>().Play();
+                notifiedLowElectricity = true;
+            }
             if (!emissionOn)
             {
                 electricityMaterial.EnableKeyword("_EMISSION");

@@ -1,14 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using DG.Tweening;
-using TMPro;
-using Unity.VisualScripting;
-using System.IO;
-using System;
-using System.Text;
-using System.Linq;
 using System.Globalization;
+using System.IO;
+using UnityEngine;
 
 public class ReplayPlayer : MonoBehaviour
 {
@@ -23,6 +16,8 @@ public class ReplayPlayer : MonoBehaviour
     private bool mainLightOn = false;
     private bool leftLightOn = false;
     private bool rightLightOn = false;
+
+    public int replaySpeed = 1;
 
     private StreamReader reader;
 
@@ -59,10 +54,13 @@ public class ReplayPlayer : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab)) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
+        if (Input.GetKeyDown(KeyCode.KeypadPlus) && replaySpeed < 10) replaySpeed++;
+        if (Input.GetKeyDown(KeyCode.KeypadMinus) && replaySpeed > 1) replaySpeed--;
     }
 
     void FixedUpdate()
     {
+        for (int i = 1; i < replaySpeed; i++) reader.ReadLine();
         string currentLine = reader.ReadLine();
         if (currentLine == null) return;
         string[] currentValues = currentLine.Split(',');
@@ -170,7 +168,87 @@ public class ReplayPlayer : MonoBehaviour
 
     public void SetStreamReader(string file)
     {
-        reader = new StreamReader(file);
+        GameObject markers = GameObject.Find("Markers");
+        if (markers != null) Destroy(markers);
+        markers = new GameObject("Markers");
+        StreamReader markerReader = new(file);
+        markerReader.ReadLine();
+        while (!markerReader.EndOfStream)
+        {
+            for (int i = 0; i < 49; i++) markerReader.ReadLine();
+            string currentLine = markerReader.ReadLine();
+            if (currentLine == null) break;
+            string[] currentValues = currentLine.Split(',');
+            if (currentValues.Length != 18) break;
+
+            Vector3 position;
+            position.x = float.Parse(currentValues[0], CultureInfo.InvariantCulture);
+            position.y = float.Parse(currentValues[1], CultureInfo.InvariantCulture);
+            position.z = float.Parse(currentValues[2], CultureInfo.InvariantCulture);
+
+            Quaternion submarineRotation;
+            submarineRotation.x = float.Parse(currentValues[5], CultureInfo.InvariantCulture);
+            submarineRotation.y = float.Parse(currentValues[6], CultureInfo.InvariantCulture);
+            submarineRotation.z = float.Parse(currentValues[7], CultureInfo.InvariantCulture);
+            submarineRotation.w = float.Parse(currentValues[8], CultureInfo.InvariantCulture);
+
+            GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            marker.transform.SetPositionAndRotation(position, submarineRotation);
+            marker.transform.Rotate(-90, 0, 0);
+            marker.transform.localScale = new Vector3(0.5f, 0.3f, 0.5f);
+
+            marker.transform.parent = markers.transform;
+        }
+        markerReader.Close();
+        reader = new(file);
         reader.ReadLine();
+    }
+
+    public void SetSettings(string file)
+    {
+        StreamReader settingsReader = new(file);
+        settingsReader.ReadLine();
+        string[] settings = settingsReader.ReadLine().Split(',');
+        Vector3 submarinePosition;
+        submarinePosition.x = float.Parse(settings[0], CultureInfo.InvariantCulture);
+        submarinePosition.y = float.Parse(settings[1], CultureInfo.InvariantCulture);
+        submarinePosition.z = float.Parse(settings[2], CultureInfo.InvariantCulture);
+        transform.position = submarinePosition;
+
+        Vector3 diver1Position;
+        diver1Position.x = float.Parse(settings[3], CultureInfo.InvariantCulture);
+        diver1Position.y = float.Parse(settings[4], CultureInfo.InvariantCulture);
+        diver1Position.z = float.Parse(settings[5], CultureInfo.InvariantCulture);
+        GameObject.Find("Diver1").transform.position = diver1Position;
+
+        Vector3 diver2Position;
+        diver2Position.x = float.Parse(settings[6], CultureInfo.InvariantCulture);
+        diver2Position.y = float.Parse(settings[7], CultureInfo.InvariantCulture);
+        diver2Position.z = float.Parse(settings[8], CultureInfo.InvariantCulture);
+        GameObject.Find("Diver2").transform.position = diver2Position;
+
+        Vector3 diver3Position;
+        diver3Position.x = float.Parse(settings[9], CultureInfo.InvariantCulture);
+        diver3Position.y = float.Parse(settings[10], CultureInfo.InvariantCulture);
+        diver3Position.z = float.Parse(settings[11], CultureInfo.InvariantCulture);
+        GameObject.Find("Diver3").transform.position = diver3Position;
+
+        Vector3 diver4Position;
+        diver4Position.x = float.Parse(settings[12], CultureInfo.InvariantCulture);
+        diver4Position.y = float.Parse(settings[13], CultureInfo.InvariantCulture);
+        diver4Position.z = float.Parse(settings[14], CultureInfo.InvariantCulture);
+        GameObject.Find("Diver4").transform.position = diver4Position;
+
+        Vector3 diver5Position;
+        diver5Position.x = float.Parse(settings[15], CultureInfo.InvariantCulture);
+        diver5Position.y = float.Parse(settings[16], CultureInfo.InvariantCulture);
+        diver5Position.z = float.Parse(settings[17], CultureInfo.InvariantCulture);
+        GameObject.Find("Diver5").transform.position = diver5Position;
+
+        Vector3 testingDiverPosition;
+        testingDiverPosition.x = float.Parse(settings[18], CultureInfo.InvariantCulture);
+        testingDiverPosition.y = float.Parse(settings[19], CultureInfo.InvariantCulture);
+        testingDiverPosition.z = float.Parse(settings[20], CultureInfo.InvariantCulture);
+        GameObject.Find("TestingDiver").transform.position = testingDiverPosition;
     }
 }

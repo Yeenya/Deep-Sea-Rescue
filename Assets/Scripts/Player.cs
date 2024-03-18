@@ -26,7 +26,7 @@ public class Player : MonoBehaviour
     private readonly float periscopeLightMaxIntensity = 4f;
     private readonly float additionalLightsMaxIntensity = 2f;
 
-    public readonly float maxElectricity = 600f;
+    public readonly float maxElectricity = 900f;
     private float electricity;
     private bool mainLightOn = false;
     private bool leftLightOn = false;
@@ -98,7 +98,7 @@ public class Player : MonoBehaviour
         MoveSubmarine();
         ConstrainMove();
         CheckInput();
-        //DrainElectricity();
+        DrainElectricity();
         RotorAudio();
     }
 
@@ -190,11 +190,11 @@ public class Player : MonoBehaviour
 
     private void ConstrainMove()
     {
-        if (transform.position.x > 490) GetComponent<Rigidbody>().AddForce(-Vector3.right);
-        else if (transform.position.x < 10) GetComponent<Rigidbody>().AddForce(Vector3.right);
+        if (transform.position.x > 490) transform.position = new Vector3(490, transform.position.y, transform.position.z);
+        else if (transform.position.x < 10) transform.position = new Vector3(10, transform.position.y, transform.position.z);
 
-        if (transform.position.z > 490) GetComponent<Rigidbody>().AddForce(-Vector3.forward);
-        else if (transform.position.z < 10) GetComponent<Rigidbody>().AddForce(Vector3.forward);
+        if (transform.position.z > 490) transform.position = new Vector3(transform.position.x, transform.position.y, 490);
+        else if (transform.position.z < 10) transform.position = new Vector3(transform.position.x, transform.position.y, 10);
     }
 
     private void CheckInput()
@@ -271,7 +271,7 @@ public class Player : MonoBehaviour
         else if (!rotorSound.isPlaying) rotorSound.Play();
 
         rotorSound.pitch = Mathf.Abs(velocity) / maxVelocity;
-        rotorSound.volume = rotorSound.pitch / 2;
+        rotorSound.volume = rotorSound.pitch / 4;
     }
 
     private void RescueDiver()

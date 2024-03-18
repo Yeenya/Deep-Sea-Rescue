@@ -307,7 +307,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: cb09ccfb70cdba24aa1fffcbd92f4db2, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.5
+  m_Volume: 0.3
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -1166,6 +1166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 372d1d56e9fd3994b87a8e1001d02020, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  replaySpeed: 1
   rotorSound: {fileID: 119582097}
   terrainParticles: {fileID: 459572641}
   terrainDragSound: {fileID: 459572642}

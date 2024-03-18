@@ -10,6 +10,8 @@ public class ReplayMenu : MonoBehaviour
     [SerializeField]
     private GameObject replayButtonPrefab;
 
+    private bool replaysLoaded = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,8 +27,9 @@ public class ReplayMenu : MonoBehaviour
     public void LoadSavedReplays()
     {
         gameObject.SetActive(true);
+        if (replaysLoaded) return;
 
-        foreach(string fileName in Directory.GetFiles(Application.persistentDataPath + "/Data"))
+        foreach (string fileName in Directory.GetFiles(Application.persistentDataPath + "/Data"))
         {
             if (fileName.Contains("Settings")) continue;
             GameObject replayButton = Instantiate(replayButtonPrefab, transform);
@@ -34,6 +37,7 @@ public class ReplayMenu : MonoBehaviour
             replayButton.GetComponentInChildren<TextMeshProUGUI>().text = Path.GetFileName(fileName);
             replayButton.GetComponent<Button>().onClick.AddListener(() => LoadReplay(fileName));
         }
+        replaysLoaded = true;
     }
 
     public void LoadReplay(string replayFileName)
@@ -41,6 +45,7 @@ public class ReplayMenu : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         player.GetComponent<Player>().enabled = false;
         player.GetComponent<ReplayPlayer>().SetStreamReader(replayFileName);
+        player.GetComponent<ReplayPlayer>().SetSettings(replayFileName[..^4] + "_Settings.csv");
         player.GetComponent<ReplayPlayer>().enabled = true;
     }
 }
