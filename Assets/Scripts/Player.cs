@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using System.IO;
 using System;
 using System.Text;
+using UnityEditor.Experimental.GraphView;
 
 public class Player : MonoBehaviour
 {
@@ -28,6 +29,7 @@ public class Player : MonoBehaviour
 
     public readonly float maxElectricity = 900f;
     private float electricity;
+    private float chargedElectricity = 0f;
     private bool mainLightOn = false;
     private bool leftLightOn = false;
     private bool rightLightOn = false;
@@ -56,12 +58,24 @@ public class Player : MonoBehaviour
 
     public bool gameOver = false;
 
-    string logFilePath;
-    StreamWriter writer;
+    private string logFilePath;
+    private StreamWriter writer;
 
-    Vector3 lastPosition;
-    float distance = 0f;
-    float time = 0f;
+    private Vector3 lastPosition;
+    private float distance = 0f;
+    private float time = 0f;
+
+    private enum State
+    {
+        FREE,
+        DOCKED,
+        REPLAY
+    }
+
+    private State state = State.DOCKED;
+    private bool nearDock = false;
+    [SerializeField]
+    private AudioSource baseSonar;
 
     void Start()
     {
@@ -95,11 +109,15 @@ public class Player : MonoBehaviour
             GameOver();
             return;
         }
-        MoveSubmarine();
+        if (state == State.FREE)
+        {
+            MoveSubmarine();
+        }
         ConstrainMove();
         CheckInput();
-        DrainElectricity();
+        ChangeElectricity();
         RotorAudio();
+        ChangeBaseSonar();
     }
 
     void FixedUpdate()
@@ -144,7 +162,7 @@ public class Player : MonoBehaviour
         // Forward/backward
         if (Input.GetKey(KeyCode.W)) velocity += 0.1f;
         else if (Input.GetKey(KeyCode.S)) velocity -= 0.1f;
-        else if (velocity != 0) velocity -= Mathf.Sign(velocity) * 0.1f;
+        else if (velocity != 0) velocity -= Mathf.Sign(velocity) * 0.2f;
 
         if (velocity > maxVelocity) velocity = maxVelocity;
         else if (velocity < -maxVelocity) velocity = -maxVelocity;
@@ -153,22 +171,22 @@ public class Player : MonoBehaviour
         float velocitySign = velocity != 0 ? Mathf.Sign(velocity) : 1;
 
         // Left/right
-        if (Input.GetKey(KeyCode.A)) horizontalRotationSpeed -= 1f * velocitySign;
-        else if (Input.GetKey(KeyCode.D)) horizontalRotationSpeed += 1f * velocitySign;
-        else if (horizontalRotationSpeed != 0) horizontalRotationSpeed -= Mathf.Sign(horizontalRotationSpeed);
+        if (Input.GetKey(KeyCode.A)) horizontalRotationSpeed -= 3f * velocitySign;
+        else if (Input.GetKey(KeyCode.D)) horizontalRotationSpeed += 3f * velocitySign;
+        else if (horizontalRotationSpeed != 0) horizontalRotationSpeed -= Mathf.Sign(horizontalRotationSpeed) * 5;
 
         if (horizontalRotationSpeed > maxRotationSpeed) horizontalRotationSpeed = maxRotationSpeed;
         else if (horizontalRotationSpeed < -maxRotationSpeed) horizontalRotationSpeed = -maxRotationSpeed;
-        else if (horizontalRotationSpeed < 1 && horizontalRotationSpeed > -1) horizontalRotationSpeed = 0;
+        else if (horizontalRotationSpeed < 3 && horizontalRotationSpeed > -3) horizontalRotationSpeed = 0;
 
         // Up/down
-        if (Input.GetKey(KeyCode.LeftControl)) verticalRotationSpeed += 1f;
-        else if (Input.GetKey(KeyCode.LeftShift)) verticalRotationSpeed -= 1f;
-        else if (verticalRotationSpeed != 0) verticalRotationSpeed -= Mathf.Sign(verticalRotationSpeed);
+        if (Input.GetKey(KeyCode.LeftControl)) verticalRotationSpeed += 3f;
+        else if (Input.GetKey(KeyCode.LeftShift)) verticalRotationSpeed -= 3f;
+        else if (verticalRotationSpeed != 0) verticalRotationSpeed -= Mathf.Sign(verticalRotationSpeed) * 5;
 
         if (verticalRotationSpeed > maxRotationSpeed) verticalRotationSpeed = maxRotationSpeed;
         else if (verticalRotationSpeed < -maxRotationSpeed) verticalRotationSpeed = -maxRotationSpeed;
-        else if (verticalRotationSpeed < 1 && verticalRotationSpeed > -1) verticalRotationSpeed = 0;
+        else if (verticalRotationSpeed < 3 && verticalRotationSpeed > -3) verticalRotationSpeed = 0;
         
         // Apply movement to position and rotation
         if (velocity != 0) transform.position += Time.deltaTime * velocity * transform.forward;
@@ -206,6 +224,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.V)) ChangeRightLight();
 
         if (Input.GetKeyDown(KeyCode.R)) RescueDiver();
+        if (Input.GetKeyDown(KeyCode.Space)) BaseDock();
     }
 
     private void ChangeMainLight()
@@ -238,13 +257,22 @@ public class Player : MonoBehaviour
         rightLightOn = !rightLightOn;
     }
 
-    private void DrainElectricity()
+    private void ChangeElectricity()
     {
-        float coefficient = 1;
-        if (mainLightOn) coefficient += 1;
-        if (leftLightOn) coefficient += 0.5f;
-        if (rightLightOn) coefficient += 0.5f;
-        electricity -= Time.deltaTime * coefficient;
+        if (state == State.FREE)
+        {
+            float coefficient = 1;
+            if (mainLightOn) coefficient += 1;
+            if (leftLightOn) coefficient += 0.5f;
+            if (rightLightOn) coefficient += 0.5f;
+            electricity -= Time.deltaTime * coefficient;
+        }
+        else if (state == State.DOCKED && chargedElectricity < maxElectricity / 2)
+        {
+            float addition = Time.deltaTime * 5f;
+            electricity += addition;
+            chargedElectricity += addition;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -256,12 +284,45 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Terrain"))
+        {
+            if (velocity == 0 && terrainParticles.isPlaying)
+            {
+                terrainParticles.Stop();
+                terrainDragSound.DOFade(0, 1);
+            }
+            else if (velocity != 0 && !terrainParticles.isPlaying)
+            {
+                terrainParticles.Play();
+                terrainDragSound.DOFade(1, 1);
+            }
+        }
+    }
+
     private void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.CompareTag("Terrain"))
         {
             terrainParticles.Stop();
             terrainDragSound.DOFade(0, 1);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Tube"))
+        {
+            nearDock = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Tube"))
+        {
+            nearDock = false;
         }
     }
 
@@ -291,6 +352,38 @@ public class Player : MonoBehaviour
                 }
                 break;
             }
+        }
+    }
+
+    private void BaseDock()
+    {
+        if (state == State.DOCKED)
+        {
+            state = State.FREE;
+        }
+        else if (state == State.FREE && nearDock)
+        {
+            state = State.DOCKED;
+            Transform dockPoint = GameObject.FindGameObjectWithTag("Tube").transform.GetChild(0);
+            transform.SetPositionAndRotation(dockPoint.position, dockPoint.rotation);
+        }
+    }
+
+    private void ChangeBaseSonar()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (baseSonar.isPlaying) baseSonar.Stop();
+            else baseSonar.Play();
+        }
+
+        if (baseSonar.isPlaying)
+        {
+            float distance = Vector3.Distance(transform.position, baseSonar.transform.position);
+            if (Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) baseSonar.volume = 0.25f;
+            else baseSonar.volume = 0f;
+            float nonModifiedPitch = (baseSonar.maxDistance - distance) / baseSonar.maxDistance;
+            baseSonar.pitch = 0.5f + (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 0.5f; //easeInSine from https://easings.net/#easeInSine
         }
     }
 

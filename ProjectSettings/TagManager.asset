@@ -12,6 +12,7 @@ TagManager:
   - Diver
   - TiltModel
   - ElectricityBar
+  - Tube
   layers:
   - Default
   - TransparentFX
