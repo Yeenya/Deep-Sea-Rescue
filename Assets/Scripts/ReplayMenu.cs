@@ -42,10 +42,15 @@ public class ReplayMenu : MonoBehaviour
 
     public void LoadReplay(string replayFileName)
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        player.state = Player.State.REPLAY;
+        player.SetStreamReader(replayFileName);
+        player.SetSettings(replayFileName[..^4] + "_Settings");//.csv");
+        /*
         player.GetComponent<Player>().enabled = false;
         player.GetComponent<ReplayPlayer>().SetStreamReader(replayFileName);
         player.GetComponent<ReplayPlayer>().SetSettings(replayFileName[..^4] + "_Settings.csv");
         player.GetComponent<ReplayPlayer>().enabled = true;
+        */
     }
 }

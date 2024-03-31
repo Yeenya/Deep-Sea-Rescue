@@ -1610,7 +1610,6 @@ GameObject:
   - component: {fileID: 212990274}
   - component: {fileID: 212990275}
   - component: {fileID: 212990276}
-  - component: {fileID: 212990278}
   - component: {fileID: 212990277}
   m_Layer: 0
   m_Name: Player
@@ -1627,8 +1626,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 212990271}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.13803865, y: -0, z: -0, w: 0.99042684}
-  m_LocalPosition: {x: 207.9, y: 124.03, z: 189.68}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 207.89308, y: 131.02519, z: 189.03}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1709,6 +1708,9 @@ MonoBehaviour:
   gameOverMenu: {fileID: 606347260}
   gameWonMenu: {fileID: 1929047561}
   gameOver: 0
+  replaySpeed: 1
+  insideSpot: {fileID: 956250956}
+  state: 1
   baseSonar: {fileID: 753622732}
 --- !u!82 &212990277
 AudioSource:
@@ -1806,24 +1808,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &212990278
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 212990271}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 372d1d56e9fd3994b87a8e1001d02020, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  replaySpeed: 1
-  rotorSound: {fileID: 119582097}
-  terrainParticles: {fileID: 459572641}
-  terrainDragSound: {fileID: 459572642}
-  tiltModel: {fileID: 0}
-  insideSpot: {fileID: 956250956}
 --- !u!1 &227983826 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1829902048381404, guid: 873ac25ac1e31f64e935305e5b6b41d1, type: 3}
