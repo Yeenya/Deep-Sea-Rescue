@@ -33,7 +33,7 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            if (player.GetComponent<ReplayPlayer>().enabled) return;
+            if (player.GetComponent<Player>().state == Player.State.REPLAY) return;
 
             if (Cursor.lockState == CursorLockMode.Locked)
             {
