@@ -84,6 +84,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioSource baseSonar;
     private bool baseSonarPlaying = false;
+    private bool tiltDelayActive = false;
 
     void Start()
     {
@@ -251,9 +252,6 @@ public class Player : MonoBehaviour
         if (velocity != 0) transform.position += Time.deltaTime * velocity * transform.forward;
         transform.Rotate(new Vector3(verticalRotationSpeed, horizontalRotationSpeed, 0) * Time.deltaTime);
         transform.Rotate(0, 0, -transform.rotation.eulerAngles.z);
-
-        if (verticalRotationSpeed != 0) tiltModel.GetComponent<AudioSource>().volume = 0.025f;
-        else tiltModel.GetComponent<AudioSource>().volume = 0f;
 
         // Limit x rotation so that player doesn't spin to infinity
         Vector3 correctRotation = transform.rotation.eulerAngles;
@@ -472,6 +470,23 @@ public class Player : MonoBehaviour
             pitch = 2f + (360f - tiltModel.transform.localRotation.eulerAngles.x) / 40f;
         }
         tiltModel.GetComponent<AudioSource>().pitch = pitch;
+
+        if (verticalRotationSpeed != 0)
+        {
+            tiltDelayActive = false;
+            tiltModel.GetComponent<AudioSource>().volume = 0.025f;
+        }
+        else if (!tiltDelayActive)
+        {
+            tiltDelayActive = true;
+            StartCoroutine(TiltDelay());
+        }
+    }
+
+    private IEnumerator TiltDelay()
+    {
+        yield return new WaitForSeconds(1);
+        tiltModel.GetComponent<AudioSource>().volume = 0f;
     }
 
     private void GameOver()
