@@ -83,6 +83,7 @@ public class Player : MonoBehaviour
     private bool nearDock = false;
     [SerializeField]
     private AudioSource baseSonar;
+    private bool baseSonarPlaying = false;
 
     void Start()
     {
@@ -126,7 +127,8 @@ public class Player : MonoBehaviour
             CheckInput();
             ChangeElectricity();
             RotorAudio();
-            ChangeBaseSonar();
+            BaseSonarAudio();
+            TiltAudio();
         }
         else
         {
@@ -249,6 +251,9 @@ public class Player : MonoBehaviour
         if (velocity != 0) transform.position += Time.deltaTime * velocity * transform.forward;
         transform.Rotate(new Vector3(verticalRotationSpeed, horizontalRotationSpeed, 0) * Time.deltaTime);
         transform.Rotate(0, 0, -transform.rotation.eulerAngles.z);
+
+        if (verticalRotationSpeed != 0) tiltModel.GetComponent<AudioSource>().volume = 0.025f;
+        else tiltModel.GetComponent<AudioSource>().volume = 0f;
 
         // Limit x rotation so that player doesn't spin to infinity
         Vector3 correctRotation = transform.rotation.eulerAngles;
@@ -401,12 +406,6 @@ public class Player : MonoBehaviour
             {
                 diver.GetComponent<Diver>().GetSaved(terrainParticles.transform.position);
                 savedDivers++;
-                if (savedDivers == 6)
-                {
-                    gameWonMenu.SetActive(true);
-                    Time.timeScale = 0f;
-                    gameOver = true;
-                }
                 break;
             }
         }
@@ -423,25 +422,56 @@ public class Player : MonoBehaviour
             state = State.DOCKED;
             Transform dockPoint = GameObject.FindGameObjectWithTag("Tube").transform.GetChild(0);
             transform.SetPositionAndRotation(dockPoint.position, dockPoint.rotation);
+            if (savedDivers == 6)
+            {
+                gameWonMenu.SetActive(true);
+                Time.timeScale = 0f;
+                gameOver = true;
+            }
         }
     }
 
-    private void ChangeBaseSonar()
+    private void BaseSonarAudio()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (baseSonar.isPlaying) baseSonar.Stop();
-            else baseSonar.Play();
+            baseSonarPlaying = !baseSonarPlaying;
+            if (baseSonarPlaying) StartCoroutine(BaseSonarPing());
+            else
+            {
+                baseSonar.volume = 0f;
+                StopAllCoroutines();
+            }
         }
+    }
 
-        if (baseSonar.isPlaying)
+    private IEnumerator BaseSonarPing()
+    {
+        if (Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) baseSonar.volume = 0.25f;
+        else baseSonar.volume = 0f;
+
+        float distance = Vector3.Distance(transform.position, baseSonar.transform.position);
+        float nonModifiedPitch = (baseSonar.maxDistance - distance) / baseSonar.maxDistance;
+        baseSonar.pitch = 0.5f + (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 0.5f; //easeInSine from https://easings.net/#easeInSine
+
+        baseSonar.Play();
+
+        yield return new WaitForSeconds(15);
+        if (baseSonarPlaying) StartCoroutine(BaseSonarPing());
+    }
+
+    private void TiltAudio()
+    {
+        float pitch;
+        if (tiltModel.transform.localRotation.eulerAngles.x <= 81)
         {
-            float distance = Vector3.Distance(transform.position, baseSonar.transform.position);
-            if (Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) baseSonar.volume = 0.25f;
-            else baseSonar.volume = 0f;
-            float nonModifiedPitch = (baseSonar.maxDistance - distance) / baseSonar.maxDistance;
-            baseSonar.pitch = 0.5f + (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 0.5f; //easeInSine from https://easings.net/#easeInSine
+            pitch = 2f - tiltModel.transform.localRotation.eulerAngles.x / 80f;
         }
+        else
+        {
+            pitch = 2f + (360f - tiltModel.transform.localRotation.eulerAngles.x) / 40f;
+        }
+        tiltModel.GetComponent<AudioSource>().pitch = pitch;
     }
 
     private void GameOver()
