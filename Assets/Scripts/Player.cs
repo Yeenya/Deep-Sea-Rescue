@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using TMPro;
-using Unity.VisualScripting;
 using System.IO;
 using System;
 using System.Text;
-using UnityEditor.Experimental.GraphView;
 using System.Globalization;
-using UnityEngine.Analytics;
 
 public class Player : MonoBehaviour
 {
