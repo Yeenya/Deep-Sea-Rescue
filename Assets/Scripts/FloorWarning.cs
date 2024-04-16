@@ -18,7 +18,7 @@ public class FloorWarning : MonoBehaviour
     private void Update()
     {
         float closestDistance = float.MaxValue;
-        if (Physics.Raycast(transform.parent.position, transform.parent.forward, out RaycastHit hit))
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
         {
             if (hit.collider.CompareTag("Terrain") && hit.distance < closestDistance)
             {
@@ -26,6 +26,7 @@ public class FloorWarning : MonoBehaviour
                 frontOrBelow = true;
             }
         }
+        /*
         if (Physics.Raycast(transform.parent.position, -transform.parent.up, out hit))
         {
             if (hit.collider.CompareTag("Terrain") && hit.distance < closestDistance)
@@ -34,6 +35,7 @@ public class FloorWarning : MonoBehaviour
                 frontOrBelow = false;
             }
         }
+        */
 
         if (closestDistance <= maxWarningDistance)
         {
