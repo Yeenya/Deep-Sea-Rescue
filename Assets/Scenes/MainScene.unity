@@ -1707,6 +1707,7 @@ MonoBehaviour:
   tiltModel: {fileID: 0}
   gameOverMenu: {fileID: 606347260}
   gameWonMenu: {fileID: 1929047561}
+  diverPrefab: {fileID: 1431970472270652, guid: d1ce76d9880d2224daf799edbd26b1a0, type: 3}
   gameOver: 0
   replaySpeed: 1
   insideSpot: {fileID: 956250956}
@@ -10581,11 +10582,21 @@ MonoBehaviour:
     V - Turn on/off right light
 
 
-    R - Rescue nearby diver
+    E - Turn on/off docking base ping
 
 
-    Tab
-    - Switch outside/inside view
+    R
+    - Rescue nearby diver
+
+
+    Space - Dock to base when near
+
+
+    Tab - Switch
+    outside/inside view
+
+
+    T - Start audio tutorial
 
 
     Esc - Open/close menu'
@@ -10615,8 +10626,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 27
+  m_fontSizeBase: 27
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -11006,7 +11017,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &861152466
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11846,6 +11857,11 @@ MonoBehaviour:
     meter and a tiny submarine model showing your current tilt.
 
 
+    To start, you
+    have to first undock from the base. If you start running low on electricity,
+    you can go to the base and redock to recharge some electricity.
+
+
     Good luck!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11873,8 +11889,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26
-  m_fontSizeBase: 26
+  m_fontSize: 23
+  m_fontSizeBase: 23
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -12620,7 +12636,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1109505652
 RectTransform:
   m_ObjectHideFlags: 0

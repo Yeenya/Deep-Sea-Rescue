@@ -55,6 +55,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject gameWonMenu;
 
+    [SerializeField]
+    private GameObject diverPrefab;
+
     public bool gameOver = false;
 
     private string logFilePath;
@@ -73,7 +76,8 @@ public class Player : MonoBehaviour
     {
         FREE,
         DOCKED,
-        REPLAY
+        REPLAY,
+        TUTORIAL
     }
 
     public State state = State.DOCKED;
@@ -110,7 +114,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (state != State.REPLAY)
+        if (state == State.FREE || state == State.DOCKED)
         {
             if (electricity <= 0)
             {
@@ -128,7 +132,7 @@ public class Player : MonoBehaviour
             BaseSonarAudio();
             TiltAudio();
         }
-        else
+        else if (state == State.REPLAY)
         {
             if (Input.GetKeyDown(KeyCode.Tab)) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
             if (Input.GetKeyDown(KeyCode.KeypadPlus) && replaySpeed < 10) replaySpeed++;
@@ -282,6 +286,8 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R)) RescueDiver();
         if (Input.GetKeyDown(KeyCode.Space)) BaseDock();
+
+        if (Input.GetKeyDown(KeyCode.T)) StartCoroutine(SoundTutorial());
     }
 
     private void ChangeMainLight()
@@ -678,5 +684,77 @@ public class Player : MonoBehaviour
             testingDiverPosition.z = float.Parse(settings[20], CultureInfo.InvariantCulture);
             GameObject.Find("TestingDiver").transform.position = testingDiverPosition;
         }
+    }
+
+    private IEnumerator SoundTutorial()
+    {
+        State previousState = state;
+        state = State.TUTORIAL;
+
+        if (!Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
+        GameObject[] divers = GameObject.FindGameObjectsWithTag("Diver");
+        foreach (GameObject diver in divers)
+        {
+            diver.GetComponent<AudioSource>().volume = 0f;
+            diver.GetComponent<AudioSource>().Stop();
+        }
+
+        GameObject tutorialDiver = Instantiate(diverPrefab, transform.position - transform.right * 10, Quaternion.identity);
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position - transform.right * 50;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position - transform.right * 100;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position + transform.forward * 10;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position + transform.forward * 50;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position + transform.forward * 100;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position + transform.right * 10;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position + transform.right * 50;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position + transform.right * 100;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position - transform.forward * 10;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position - transform.forward * 50;
+
+        yield return new WaitForSeconds(4f);
+
+        tutorialDiver.transform.position = transform.position - transform.forward * 100;
+
+        yield return new WaitForSeconds(4f);
+        
+        Destroy(tutorialDiver);
+
+        foreach (GameObject diver in divers)
+        {
+            diver.GetComponent<AudioSource>().volume = 1f;
+            diver.GetComponent<AudioSource>().Play();
+        }
+
+        state = previousState;
     }
 }

@@ -21,8 +21,11 @@ public class Diver : MonoBehaviour
     void Update()
     {
         float distance = Vector3.Distance(transform.position, player.transform.position);
-        if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
-        else sonarSound.volume = 0;
+        if (player.GetComponent<Player>().state != Player.State.TUTORIAL)
+        {
+            if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
+            else sonarSound.volume = 0;
+        }
         float nonModifiedPitch = (sonarSound.maxDistance - distance) / sonarSound.maxDistance;
         sonarSound.pitch = (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 2 + 1; //easeInSine from https://easings.net/#easeInSine
     }
