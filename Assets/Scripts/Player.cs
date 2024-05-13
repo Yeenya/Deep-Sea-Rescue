@@ -58,6 +58,11 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject diverPrefab;
 
+    [SerializeField]
+    private AudioClip[] dockingSounds;
+
+    private AudioSource dockingAudio;
+
     public bool gameOver = false;
 
     private string logFilePath;
@@ -110,6 +115,12 @@ public class Player : MonoBehaviour
         tiltModel = GameObject.FindGameObjectWithTag("TiltModel");
 
         lastPosition = transform.position;
+
+        dockingAudio = GetComponent<AudioSource>();
+
+#if UNITY_STANDALONE
+        WriteFilesIfNeccessary();
+#endif
     }
 
     void Update()
@@ -287,7 +298,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R)) RescueDiver();
         if (Input.GetKeyDown(KeyCode.Space)) BaseDock();
 
-        if (Input.GetKeyDown(KeyCode.T)) StartCoroutine(SoundTutorial());
+        if (Input.GetKeyDown(KeyCode.T)) StartCoroutine(GetComponent<AudioTutorial>().Tutorial());
     }
 
     private void ChangeMainLight()
@@ -417,10 +428,14 @@ public class Player : MonoBehaviour
         if (state == State.DOCKED)
         {
             state = State.FREE;
+            dockingAudio.clip = dockingSounds[1];
+            dockingAudio.Play();
         }
         else if (state == State.FREE && nearDock)
         {
             state = State.DOCKED;
+            dockingAudio.clip = dockingSounds[0];
+            dockingAudio.Play();
             Transform dockPoint = GameObject.FindGameObjectWithTag("Tube").transform.GetChild(0);
             transform.SetPositionAndRotation(dockPoint.position, dockPoint.rotation);
             if (savedDivers == 6)
@@ -686,75 +701,18 @@ public class Player : MonoBehaviour
         }
     }
 
-    private IEnumerator SoundTutorial()
+    public GameObject GetDiverPrefab()
     {
-        State previousState = state;
-        state = State.TUTORIAL;
+        return diverPrefab;
+    }
 
-        if (!Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
-        GameObject[] divers = GameObject.FindGameObjectsWithTag("Diver");
-        foreach (GameObject diver in divers)
-        {
-            diver.GetComponent<AudioSource>().volume = 0f;
-            diver.GetComponent<AudioSource>().Stop();
-        }
+    public bool GetLightsOn()
+    {
+        return leftLightOn && mainLightOn && rightLightOn;
+    }
 
-        GameObject tutorialDiver = Instantiate(diverPrefab, transform.position - transform.right * 10, Quaternion.identity);
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position - transform.right * 50;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position - transform.right * 100;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position + transform.forward * 10;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position + transform.forward * 50;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position + transform.forward * 100;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position + transform.right * 10;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position + transform.right * 50;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position + transform.right * 100;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position - transform.forward * 10;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position - transform.forward * 50;
-
-        yield return new WaitForSeconds(4f);
-
-        tutorialDiver.transform.position = transform.position - transform.forward * 100;
-
-        yield return new WaitForSeconds(4f);
-        
-        Destroy(tutorialDiver);
-
-        foreach (GameObject diver in divers)
-        {
-            diver.GetComponent<AudioSource>().volume = 1f;
-            diver.GetComponent<AudioSource>().Play();
-        }
-
-        state = previousState;
+    public int GetSavedDivers()
+    {
+        return savedDivers;
     }
 }
