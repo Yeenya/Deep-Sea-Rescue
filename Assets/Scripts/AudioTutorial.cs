@@ -13,6 +13,14 @@ public class AudioTutorial : MonoBehaviour
     [SerializeField]
     private GameObject tiltSphere;
 
+    [SerializeField]
+    private AudioClip[] voiceovers;
+
+    private short currentVoiceover = -1;
+
+    [SerializeField]
+    private AudioSource voiceoverAudio;
+
     void Start()
     {
         player = GetComponent<Player>();
@@ -32,106 +40,123 @@ public class AudioTutorial : MonoBehaviour
         //      ADD SUCCESS VOICEOVERS AFTER EVERY TASK
 
         //UNDOCK
-        //Add voiceover for undocking here
+        AdvanceVoiceovers();
         yield return new WaitUntil(() => player.state == Player.State.FREE);
         print("Undocked, get to sphere");
 
         //INTRODUCE SONAR SOUND
-        //Add voiceover for sonar introduction here
+        AdvanceVoiceovers();
         moveSphere.GetComponent<AudioSource>().Play();
 
         //MOVE
-        //Add voiceover for moving here
+        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
+        AdvanceVoiceovers();
         yield return new WaitUntil(() => Vector3.Distance(moveSphere.transform.position, transform.position) <= 8f);
         print("Got move sphere, get to tilt sphere");
+        Destroy(moveSphere.transform.parent.GetChild(moveSphere.transform.GetSiblingIndex() + 1).gameObject);
         Destroy(moveSphere);
 
         //TILT + height warning
         tiltSphere.GetComponent<AudioSource>().Play();
-        //Add voiceover for tilting here
+        AdvanceVoiceovers();
         yield return new WaitUntil(() => Vector3.Distance(tiltSphere.transform.position, transform.position) <= 8f);
+        AdvanceVoiceovers();
         print("Got tilt sphere, change view");
+        Destroy(tiltSphere.transform.parent.GetChild(tiltSphere.transform.GetSiblingIndex() + 1).gameObject);
         Destroy(tiltSphere);
 
         //CHANGE VIEW
-        //Add voiceover for changing view here
+        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
+        AdvanceVoiceovers();
         yield return new WaitUntil(() => Camera.main.GetComponent<CameraController>().GetInsideOrOutside() == false);
+        AdvanceVoiceovers();
         print("Changed view, change view again");
         yield return new WaitUntil(() => Camera.main.GetComponent<CameraController>().GetInsideOrOutside() == true);
         print("Changed view again, turn on all lights");
 
         //LIGHTS
-        //Add voiceover for lights here
+        AdvanceVoiceovers();
         yield return new WaitUntil(() => player.GetLightsOn());
         print("Turned on all lights, listen to diver sounds");
 
         //FIND + RESCUE DIVER
-        //Add voiceover for finding + rescuing here
+        AdvanceVoiceovers();
+        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
         GameObject tutorialDiver = Instantiate(GetComponent<Player>().GetDiverPrefab(), transform.position - transform.right * 10, Quaternion.identity);
+        AudioSource tutorialDiverAudio = tutorialDiver.GetComponent<AudioSource>();
 
-        yield return new WaitForSeconds(4f);
+        print(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.right * 50;
 
-        yield return new WaitForSeconds(4f);
+        print(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.right * 100;
 
-        yield return new WaitForSeconds(4f);
+        print(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.forward * 10;
 
-        yield return new WaitForSeconds(4f);
+        print(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.forward * 50;
 
-        yield return new WaitForSeconds(4f);
+        print(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.forward * 100;
 
-        yield return new WaitForSeconds(4f);
+        print(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.right * 10;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.right * 50;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.right * 100;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.forward * 10;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.forward * 50;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.forward * 100;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         Destroy(tutorialDiver);
 
-        tutorialDiver = GameObject.Find("TestingDiver");
-        tutorialDiver.GetComponent<AudioSource>().volume = 1f;
-        tutorialDiver.GetComponent<AudioSource>().Play();
 
         print("Listened to diver sounds, rescue diver");
 
-        //Add voiceover for finding and rescuing tutorial diver here
+        AdvanceVoiceovers();
+        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
+        tutorialDiver = GameObject.Find("TestingDiver");
+        tutorialDiver.GetComponent<AudioSource>().volume = 1f;
+        tutorialDiver.GetComponent<AudioSource>().Play();
         yield return new WaitUntil(() => player.GetSavedDivers() == 1);
         print("Diver rescued, go dock");
 
         //RETURN TO BASE + DOCK
-        //Add voiceover for returning here
+        AdvanceVoiceovers();
         yield return new WaitUntil(() => player.state == Player.State.DOCKED);
         print("Docked, finish");
-        //Add final voiceover here
+        AdvanceVoiceovers();
+
+        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
 
         foreach (GameObject diver in divers)
         {
@@ -139,5 +164,12 @@ public class AudioTutorial : MonoBehaviour
             diver.GetComponent<AudioSource>().volume = 1f;
             diver.GetComponent<AudioSource>().Play();
         }
+    }
+
+    private void AdvanceVoiceovers()
+    {
+        currentVoiceover++;
+        voiceoverAudio.clip = voiceovers[currentVoiceover];
+        voiceoverAudio.Play();
     }
 }

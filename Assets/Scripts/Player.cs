@@ -61,6 +61,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip[] dockingSounds;
 
+    [SerializeField]
     private AudioSource dockingAudio;
 
     public bool gameOver = false;
@@ -92,6 +93,11 @@ public class Player : MonoBehaviour
     private bool baseSonarPlaying = false;
     private bool tiltDelayActive = false;
 
+    private class Notes
+    {
+        public readonly float prime;
+    }
+
     void Start()
     {
         velocity = 0f;
@@ -115,8 +121,6 @@ public class Player : MonoBehaviour
         tiltModel = GameObject.FindGameObjectWithTag("TiltModel");
 
         lastPosition = transform.position;
-
-        dockingAudio = GetComponent<AudioSource>();
 
 #if UNITY_STANDALONE
         WriteFilesIfNeccessary();
@@ -463,7 +467,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator BaseSonarPing()
     {
-        if (Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) baseSonar.volume = 0.25f;
+        if (Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) baseSonar.volume = 0.1f;
         else baseSonar.volume = 0f;
 
         float distance = Vector3.Distance(transform.position, baseSonar.transform.position);
