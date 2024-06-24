@@ -14,9 +14,9 @@ public class FloorWarning : MonoBehaviour
 
     private void Update()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, maxWarningDistance))
         {
-            if (hit.collider.CompareTag("Terrain") && hit.distance < maxWarningDistance && Camera.main.GetComponent<CameraController>().GetInsideOrOutside())
+            if (hit.collider.CompareTag("Terrain") && Camera.main.GetComponent<CameraController>().GetInsideOrOutside())
             {
                 if (!floorWarningSound.isPlaying)
                 {
@@ -24,10 +24,10 @@ public class FloorWarning : MonoBehaviour
                 }
                 floorWarningSound.pitch = 1 + (1 - hit.distance / maxWarningDistance) * 4;
             }
-            else
-            {
-                floorWarningSound.Stop();
-            }
+        }
+        else
+        {
+            floorWarningSound.Stop();
         }
     }
 }

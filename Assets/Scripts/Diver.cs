@@ -12,22 +12,29 @@ public class Diver : MonoBehaviour
 
     void Start()
     {
-        sonarSound = GetComponent<AudioSource>();
-        sonarSound.Play();
-        player = GameObject.FindGameObjectWithTag("Player");
-        cameraController = Camera.main.GetComponent<CameraController>();
+        Init();
     }
 
     void Update()
     {
+        UpdateSound();
+    }
+
+    public void UpdateSound()
+    {
         float distance = Vector3.Distance(transform.position, player.transform.position);
-        if (player.GetComponent<Player>().state != Player.State.TUTORIAL)
-        {
-            if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
-            else sonarSound.volume = 0;
-        }
+        if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
+        else sonarSound.volume = 0;
         float nonModifiedPitch = (sonarSound.maxDistance - distance) / sonarSound.maxDistance;
         sonarSound.pitch = (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 2 + 1; //easeInSine from https://easings.net/#easeInSine
+    }
+
+    public void Init()
+    {
+        sonarSound = GetComponent<AudioSource>();
+        sonarSound.Play();
+        player = GameObject.FindGameObjectWithTag("Player");
+        cameraController = Camera.main.GetComponent<CameraController>();
     }
 
     public void GetSaved(Vector3 submarinePosition)

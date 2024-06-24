@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 0.4
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.23725122, g: 0.24245337, b: 0.22742668, a: 0.4}
+  m_IndirectSpecularColor: {r: 0.23725131, g: 0.24245349, b: 0.22742656, a: 0.4}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -535,6 +535,7 @@ GameObject:
   - component: {fileID: 108274113}
   - component: {fileID: 108274112}
   - component: {fileID: 108274110}
+  - component: {fileID: 108274114}
   m_Layer: 0
   m_Name: TiltSphere
   m_TagString: Untagged
@@ -721,6 +722,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 108274108}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &108274114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108274108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87d65fb50bb2d524fad5e0689939d947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &119582095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1062,7 +1075,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &139590452
 Transform:
   m_ObjectHideFlags: 0
@@ -2067,7 +2080,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0ec0814ef152e384ea2376ef47c42c0d, type: 3}
   - {fileID: 8300000, guid: fd7a4acc34dd26d48bd9df0d399c5fea, type: 3}
   - {fileID: 8300000, guid: ae58c7b27b0d61143a19182862e1bcde, type: 3}
-  - {fileID: 8300000, guid: 9c51864b2f6603a46aad047794998636, type: 3}
+  - {fileID: 8300000, guid: 8c967c89261d2f141b0d51a7a60165f0, type: 3}
   - {fileID: 8300000, guid: c96ceac5a217e3740b135906aa4fc38e, type: 3}
   - {fileID: 8300000, guid: e0172a0a0eb05424891ba2d04091a973, type: 3}
   - {fileID: 8300000, guid: af61a1c635427e349827c91e66e27656, type: 3}
@@ -2075,6 +2088,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 01656fa5033b26f43af92f583a159563, type: 3}
   - {fileID: 8300000, guid: a8953816e93ea9f4db2c4a2e1a16fae9, type: 3}
   - {fileID: 8300000, guid: f918acae04345ee42b00eb12f54ebadf, type: 3}
+  tutorialRoot: {fileID: 139590451}
   voiceoverAudio: {fileID: 212990277}
 --- !u!82 &212990279
 AudioSource:
@@ -12755,6 +12769,7 @@ GameObject:
   - component: {fileID: 1023208862}
   - component: {fileID: 1023208861}
   - component: {fileID: 1023208859}
+  - component: {fileID: 1023208863}
   m_Layer: 0
   m_Name: MoveSphere
   m_TagString: Untagged
@@ -12941,6 +12956,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1023208857}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1023208863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1023208857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87d65fb50bb2d524fad5e0689939d947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1025732513
 PrefabInstance:
   m_ObjectHideFlags: 0

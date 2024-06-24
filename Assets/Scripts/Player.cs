@@ -7,6 +7,7 @@ using System.IO;
 using System;
 using System.Text;
 using System.Globalization;
+using Unity.VisualScripting;
 
 public class Player : MonoBehaviour
 {
@@ -93,10 +94,15 @@ public class Player : MonoBehaviour
     private bool baseSonarPlaying = false;
     private bool tiltDelayActive = false;
 
-    private class Notes
+    public static readonly float[] majorScalePitch =
     {
-        public readonly float prime;
-    }
+        1f, 1.122462f, 1.259921f, 1.334840f, 1.498307f, 1.681793f, 1.887749f, 2f, 2.244924f, 2.519842f, 2.669680f, 2.996614f, 3.363586f, 3.775498f, 4f
+    };
+
+    public static readonly float[] majorScalePitchMidpoints =
+    {
+        1.061231f, 1.191192f, 1.297381f, 1.416574f, 1.590050f, 1.784771f, 1.943874f, 2.122462f, 2.382383f, 2.594761f, 2.833147f, 3.180100f, 3.569542f, 3.887749f
+    };
 
     void Start()
     {
@@ -491,7 +497,22 @@ public class Player : MonoBehaviour
         {
             pitch = 2f + (360f - tiltModel.transform.localRotation.eulerAngles.x) / 40f;
         }
-        tiltModel.GetComponent<AudioSource>().pitch = pitch;
+
+        float melodizedPitch = majorScalePitch[0];
+
+        for (int i  = 0; i < majorScalePitchMidpoints.Length; i++)
+        {
+            if (pitch > majorScalePitchMidpoints[i])
+            {
+                melodizedPitch = majorScalePitch[i + 1];
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        tiltModel.GetComponent<AudioSource>().pitch = melodizedPitch;
 
         if (verticalRotationSpeed != 0)
         {
