@@ -416,7 +416,7 @@ public class Player : MonoBehaviour
         else if (!rotorSound.isPlaying) rotorSound.Play();
 
         rotorSound.pitch = Mathf.Abs(velocity) / maxVelocity;
-        rotorSound.volume = rotorSound.pitch / 4;
+        rotorSound.volume = rotorSound.pitch / 5;
     }
 
     private void RescueDiver()
@@ -512,7 +512,7 @@ public class Player : MonoBehaviour
             }
         }
 
-        tiltModel.GetComponent<AudioSource>().pitch = melodizedPitch;
+        tiltModel.GetComponent<AudioSource>().pitch = pitch; //melodizedPitch;
 
         if (verticalRotationSpeed != 0)
         {
@@ -522,6 +522,7 @@ public class Player : MonoBehaviour
         else if (!tiltDelayActive)
         {
             tiltDelayActive = true;
+            tiltModel.GetComponent<AudioSource>().pitch = melodizedPitch; //tiltModel.GetComponent<AudioSource>().DOPitch(melodizedPitch, 0.25f);
             StartCoroutine(TiltDelay());
         }
     }
