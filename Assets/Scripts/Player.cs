@@ -482,7 +482,7 @@ public class Player : MonoBehaviour
 
         baseSonar.Play();
 
-        yield return new WaitForSeconds(15);
+        yield return new WaitForSeconds(5);
         if (baseSonarPlaying) StartCoroutine(BaseSonarPing());
     }
 
