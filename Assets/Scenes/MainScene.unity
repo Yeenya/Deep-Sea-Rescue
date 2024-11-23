@@ -2076,18 +2076,16 @@ MonoBehaviour:
   moveSphere: {fileID: 1023208857}
   tiltSphere: {fileID: 108274108}
   voiceovers:
-  - {fileID: 8300000, guid: d3fd649583605ba4bb72323359b969fd, type: 3}
-  - {fileID: 8300000, guid: 0ec0814ef152e384ea2376ef47c42c0d, type: 3}
-  - {fileID: 8300000, guid: fd7a4acc34dd26d48bd9df0d399c5fea, type: 3}
-  - {fileID: 8300000, guid: ae58c7b27b0d61143a19182862e1bcde, type: 3}
-  - {fileID: 8300000, guid: 8c967c89261d2f141b0d51a7a60165f0, type: 3}
-  - {fileID: 8300000, guid: c96ceac5a217e3740b135906aa4fc38e, type: 3}
-  - {fileID: 8300000, guid: e0172a0a0eb05424891ba2d04091a973, type: 3}
-  - {fileID: 8300000, guid: af61a1c635427e349827c91e66e27656, type: 3}
-  - {fileID: 8300000, guid: 65636b66b6367cd41a5cab78eb559f7c, type: 3}
-  - {fileID: 8300000, guid: 01656fa5033b26f43af92f583a159563, type: 3}
-  - {fileID: 8300000, guid: a8953816e93ea9f4db2c4a2e1a16fae9, type: 3}
-  - {fileID: 8300000, guid: f918acae04345ee42b00eb12f54ebadf, type: 3}
+  - {fileID: 8300000, guid: f1138b8ba7df7fe46989b9b5c639de8b, type: 3}
+  - {fileID: 8300000, guid: 76d1cfa80f576a540817d2b1acebce2e, type: 3}
+  - {fileID: 8300000, guid: e4694e052d299b746aa23fdb0ea8072d, type: 3}
+  - {fileID: 8300000, guid: 8f6d191763ea9604fbbbdc3d8877afbc, type: 3}
+  - {fileID: 8300000, guid: 52d8a5e27729f194e9a3312c64df54a4, type: 3}
+  - {fileID: 8300000, guid: 6fcef5c969cda4e438e0737c20658542, type: 3}
+  - {fileID: 8300000, guid: 849f121cedd443248b4880db5f94c291, type: 3}
+  - {fileID: 8300000, guid: 4202c2b7bf4a5a14483fd2c51f0e6662, type: 3}
+  - {fileID: 8300000, guid: 8e2bb3f76e0eea3429f0d795654c2a02, type: 3}
+  - {fileID: 8300000, guid: 8c1c3ecce6702cf4688cd77e6b8128e8, type: 3}
   tutorialRoot: {fileID: 139590451}
   voiceoverAudio: {fileID: 212990277}
 --- !u!82 &212990279
@@ -10526,7 +10524,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.04
+  m_Volume: 0.02
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -11516,7 +11514,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &861152466
 RectTransform:
   m_ObjectHideFlags: 0

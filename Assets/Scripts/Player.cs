@@ -741,4 +741,9 @@ public class Player : MonoBehaviour
     {
         return savedDivers;
     }
+
+    public bool IsDocked()
+    {
+        return state == State.DOCKED;
+    }
 }

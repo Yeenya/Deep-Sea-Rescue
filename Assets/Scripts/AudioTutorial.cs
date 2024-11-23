@@ -52,8 +52,8 @@ public class AudioTutorial : MonoBehaviour
         moveSphere.GetComponent<AudioSource>().Play();
 
         //MOVE
-        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
-        AdvanceVoiceovers();
+        //yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
+        //AdvanceVoiceovers();
         yield return new WaitUntil(() => Vector3.Distance(moveSphere.transform.position, transform.position) <= 8f);
         print("Got move sphere, get to tilt sphere");
         Destroy(moveSphere.transform.parent.GetChild(moveSphere.transform.GetSiblingIndex() + 1).gameObject);
@@ -69,13 +69,13 @@ public class AudioTutorial : MonoBehaviour
         Destroy(tiltSphere);
 
         //CHANGE VIEW
-        yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
-        AdvanceVoiceovers();
+        //yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
+        //AdvanceVoiceovers();
         yield return new WaitUntil(() => Camera.main.GetComponent<CameraController>().GetInsideOrOutside() == false);
         AdvanceVoiceovers();
         print("Changed view, change view again");
         yield return new WaitUntil(() => Camera.main.GetComponent<CameraController>().GetInsideOrOutside() == true);
-        print("Changed view again, turn on all lights");
+        print("Changed view again, listen to diver sounds.");
 
         //LIGHTS
         AdvanceVoiceovers();
@@ -154,11 +154,11 @@ public class AudioTutorial : MonoBehaviour
         tDiverComponent.UpdateSound();
 
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
-
+        
         Destroy(tutorialDiver);
 
         print("Listened to diver sounds, rescue diver");
-
+        
         AdvanceVoiceovers();
         yield return new WaitUntil(() => !voiceoverAudio.isPlaying);
         tutorialDiver = GameObject.Find("TestingDiver");
@@ -172,7 +172,7 @@ public class AudioTutorial : MonoBehaviour
 
         //RETURN TO BASE + DOCK
         AdvanceVoiceovers();
-        yield return new WaitUntil(IsDocked);
+        yield return new WaitUntil(Finish);
         print("Docked, finish");
         AdvanceVoiceovers();
 
@@ -186,16 +186,17 @@ public class AudioTutorial : MonoBehaviour
         }
     }
 
-    // Needs to be a separate function for some reason, because lambda function does not work
-    private bool IsDocked()
-    {
-        return player.state == Player.State.DOCKED;
-    }
-
     private void AdvanceVoiceovers()
     {
         currentVoiceover++;
         voiceoverAudio.clip = voiceovers[currentVoiceover];
         voiceoverAudio.Play();
+    }
+
+    bool Finish()
+    {
+        print(Vector3.Distance(transform.position, startingPosition) + " " + (player.IsDocked() || Vector3.Distance(transform.position, startingPosition) <= 0.5f));
+        if (player.IsDocked() || Vector3.Distance(transform.position, startingPosition) <= 0.5f) return true;
+        else return false;
     }
 }

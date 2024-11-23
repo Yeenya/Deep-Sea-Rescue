@@ -7,7 +7,7 @@ public class UIController : MonoBehaviour
 {
     void Start()
     {
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
     }
 
     void Update()
