@@ -262,8 +262,8 @@ public class Player : MonoBehaviour
         else if (horizontalRotationSpeed < 3 && horizontalRotationSpeed > -3) horizontalRotationSpeed = 0;
 
         // Up/down
-        if (Input.GetKey(KeyCode.LeftControl)) verticalRotationSpeed += 3f;
-        else if (Input.GetKey(KeyCode.LeftShift)) verticalRotationSpeed -= 3f;
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) verticalRotationSpeed += 3f;
+        else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) verticalRotationSpeed -= 3f;
         else if (verticalRotationSpeed != 0) verticalRotationSpeed -= Mathf.Sign(verticalRotationSpeed) * 5;
 
         if (verticalRotationSpeed > maxRotationSpeed) verticalRotationSpeed = maxRotationSpeed;
