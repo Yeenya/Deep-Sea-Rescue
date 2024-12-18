@@ -92,37 +92,37 @@ public class AudioTutorial : MonoBehaviour
         tDiverComponent.Init();
         tDiverComponent.UpdateSound();
 
-        print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
+        //print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.right * 50;
         tDiverComponent.UpdateSound();
 
-        print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
+        //print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position - transform.right * 100;
         tDiverComponent.UpdateSound();
 
-        print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
+        //print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.forward * 10;
         tDiverComponent.UpdateSound();
 
-        print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
+        //print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.forward * 50;
         tDiverComponent.UpdateSound();
 
-        print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
+        //print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.forward * 100;
         tDiverComponent.UpdateSound();
 
-        print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
+        //print(tutorialDiverAudio.clip.length + " " + tutorialDiverAudio.pitch + " " + (tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2));
         yield return new WaitForSeconds(tutorialDiverAudio.clip.length / tutorialDiverAudio.pitch * 2);
 
         tutorialDiver.transform.position = transform.position + transform.right * 10;
@@ -195,8 +195,8 @@ public class AudioTutorial : MonoBehaviour
 
     bool Finish()
     {
-        print(Vector3.Distance(transform.position, startingPosition) + " " + (player.IsDocked() || Vector3.Distance(transform.position, startingPosition) <= 0.5f));
-        if (player.IsDocked() || Vector3.Distance(transform.position, startingPosition) <= 0.5f) return true;
+        //print(Vector3.Distance(transform.position, startingPosition) + " " + (player.IsDocked() || Vector3.Distance(transform.position, startingPosition) <= 0.5f));
+        if (player.IsDocked() || Vector3.Distance(transform.position, startingPosition) <= 1.0f) return true;
         else return false;
     }
 }

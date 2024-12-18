@@ -262,8 +262,8 @@ public class Player : MonoBehaviour
         else if (horizontalRotationSpeed < 3 && horizontalRotationSpeed > -3) horizontalRotationSpeed = 0;
 
         // Up/down
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) verticalRotationSpeed += 3f;
-        else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) verticalRotationSpeed -= 3f;
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.DownArrow)) verticalRotationSpeed += 3f;
+        else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.UpArrow)) verticalRotationSpeed -= 3f;
         else if (verticalRotationSpeed != 0) verticalRotationSpeed -= Mathf.Sign(verticalRotationSpeed) * 5;
 
         if (verticalRotationSpeed > maxRotationSpeed) verticalRotationSpeed = maxRotationSpeed;
@@ -280,6 +280,8 @@ public class Player : MonoBehaviour
         if (correctRotation.x > 80 && correctRotation.x < 180) correctRotation.x = 80;
         if (correctRotation.x < 280 && correctRotation.x > 180) correctRotation.x = 280;
         transform.rotation = Quaternion.Euler(correctRotation);
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)) transform.rotation = Quaternion.Euler(0, correctRotation.y, correctRotation.z);
 
         rotor.transform.Rotate(0, 0.5f + velocity * 2f, 0);
 

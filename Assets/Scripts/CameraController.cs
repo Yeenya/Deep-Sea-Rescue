@@ -16,15 +16,17 @@ public class CameraController : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         cameraOffset = transform.position - player.transform.position;
-        insideOrOutside = false;
+        insideOrOutside = true;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         fovOutside = GetComponent<Camera>().fieldOfView;
         fovInside = 105f;
+        Camera.main.fieldOfView = fovInside;
         insideRotation = Vector3.zero;
     }
     
     void Update()
     {
-        /*
         if (!insideOrOutside)
         {
             Vector3 positionDifference = player.transform.TransformPoint(cameraOffset) - transform.position;
@@ -33,7 +35,6 @@ public class CameraController : MonoBehaviour
             transform.LookAt(player.transform.position + player.transform.forward * 20);
         }
         else
-        */
         {
             if (player.GetComponent<Player>().state == Player.State.REPLAY) return;
 
@@ -57,7 +58,6 @@ public class CameraController : MonoBehaviour
     public void ChangeCameraPosition()
     {
         insideOrOutside = !insideOrOutside;
-        /*
         if (!insideOrOutside)
         {
             Camera.main.fieldOfView = fovOutside;
@@ -71,7 +71,6 @@ public class CameraController : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
-        */
     }
 
     public bool GetInsideOrOutside()
