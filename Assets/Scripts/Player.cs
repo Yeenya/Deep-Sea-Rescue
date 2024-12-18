@@ -349,7 +349,7 @@ public class Player : MonoBehaviour
             if (mainLightOn) coefficient += 1;
             if (leftLightOn) coefficient += 0.5f;
             if (rightLightOn) coefficient += 0.5f;
-            electricity -= Time.deltaTime * coefficient;
+            //electricity -= Time.deltaTime * coefficient;
         }
         else if (state == State.DOCKED && chargedElectricity < maxElectricity / 2)
         {
