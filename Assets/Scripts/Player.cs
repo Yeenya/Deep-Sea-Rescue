@@ -8,9 +8,35 @@ using System;
 using System.Text;
 using System.Globalization;
 using Unity.VisualScripting;
+using static UnityEditor.PlayerSettings;
 
 public class Player : MonoBehaviour
 {
+    private Vector3 testingDiverPos = new Vector3(212.271439f, 119.490868f, 219.693787f);
+    private Vector3 diver1Pos = new Vector3(281.881012f, 36.8699989f, 294.869995f);
+    private Vector3 diver2Pos = new Vector3(87.8600006f, 23.5f, 94.5f);
+    private Vector3 diver3Pos = new Vector3(50.2999992f, 40.2999992f, 442.5f);
+    private Vector3 diver4Pos = new Vector3(443.540009f, 39.0499992f, 90.5899963f);
+    private Vector3 diver5Pos = new Vector3(427.019989f, 60.6500015f, 438.25f);
+    private Vector3 basePos = new Vector3(207.893082f, 131.025192f, 187.043793f);
+
+    Dictionary<string, List<int>> ordering = new()
+    {
+        ["11-02-2025_10-24-56.csv"] = new List<int>() { 0, 1, 5, 6 },
+        ["11-02-2025_11-43-22.csv"] = new List<int>() { 0, 1, 5, 6, 2 },
+        ["11-02-2025_13-52-54.csv"] = new List<int>() { 0, 1, 6, 2 },
+        ["16-12-2024_14-07-40.csv"] = new List<int>() { 0, 1, 6 },
+        ["19-12-2024_11-54-36.csv"] = new List<int>() { 0, 1, 3, 6, 2 },
+        ["23-03-2025_21-33-31.csv"] = new List<int>() { 0, 1, 5, 3, 2, 4, 6 }, //jeste baze mezi 4 a 6, mozna i mezi 2 a 4
+        ["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 } //nejake baze mezi;
+    };
+
+    List<Vector3> positions;
+
+    string fileName;
+    public float currentAngle;
+
+
     private float velocity;
     [Range(3, 15)]
     [SerializeField]
@@ -34,7 +60,7 @@ public class Player : MonoBehaviour
     private bool leftLightOn = false;
     private bool rightLightOn = false;
 
-    private int savedDivers = 0;
+    public int savedDivers = 0;
 
     private bool filesWritten = false;
 
@@ -106,6 +132,8 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        positions = new List<Vector3>() { testingDiverPos, diver1Pos, diver2Pos, diver3Pos, diver4Pos, diver5Pos, basePos };
+
         velocity = 0f;
         maxVelocity = 4f;
 
@@ -129,7 +157,7 @@ public class Player : MonoBehaviour
         lastPosition = transform.position;
 
 #if UNITY_STANDALONE
-        WriteFilesIfNeccessary();
+        //WriteFilesIfNeccessary();
 #endif
     }
 
@@ -156,7 +184,7 @@ public class Player : MonoBehaviour
         else if (state == State.REPLAY)
         {
             if (Input.GetKeyDown(KeyCode.Tab)) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
-            if (Input.GetKeyDown(KeyCode.KeypadPlus) && replaySpeed < 10) replaySpeed++;
+            if (Input.GetKeyDown(KeyCode.KeypadPlus) && replaySpeed < 20) replaySpeed++;
             if (Input.GetKeyDown(KeyCode.KeypadMinus) && replaySpeed > 1) replaySpeed--;
         }
     }
@@ -219,6 +247,13 @@ public class Player : MonoBehaviour
             if (rightLightOn != bool.Parse(currentValues[15])) ChangeRightLight();
 
             tiltModel.transform.localRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, 0, 0));
+
+            savedDivers = int.Parse(currentValues[16], CultureInfo.InvariantCulture);
+            Vector3 currentTargetPos = positions[ordering[fileName.Split('\\')[1]][int.Parse(currentValues[16], CultureInfo.InvariantCulture)]];
+            if (Vector3.Distance(currentTargetPos, transform.position) <= 250f) Debug.DrawLine(transform.position, currentTargetPos, Color.green);
+            else Debug.DrawLine(transform.position, currentTargetPos, Color.red);
+            Vector3 rotationVector = transform.forward;
+            currentAngle = Vector3.Angle(rotationVector, Vector3.Normalize(currentTargetPos - transform.position));
         }
     }
 
@@ -631,6 +666,7 @@ public class Player : MonoBehaviour
 
     public void SetStreamReader(string file)
     {
+        fileName = file;
         GameObject markers = GameObject.Find("Markers");
         if (markers != null) Destroy(markers);
         markers = new GameObject("Markers");
