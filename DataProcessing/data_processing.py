@@ -335,7 +335,7 @@ plt.rcParams.update({'font.size': 28})
 
 #data = load_csv_to_numpy(csv_files[1])
 #plot_trajectory(data, os.path.basename(csv_files[1]))
-plot_angular_difference_unity(processed_csv_files[1])
+#plot_angular_difference_unity(processed_csv_files[1])
 
 counter = 0
 for file_path in csv_files:
@@ -347,6 +347,6 @@ for file_path in csv_files:
     #plot_trajectory(data, file_path)
     #plot_angular_difference_unity(processed_csv_files[counter])
 
-    #calculate_values(name, data, processed_data)
+    calculate_values(name, data, processed_data)
 
     counter += 1
