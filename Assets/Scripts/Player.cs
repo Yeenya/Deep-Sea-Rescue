@@ -23,12 +23,14 @@ public class Player : MonoBehaviour
     Dictionary<string, List<int>> ordering = new()
     {
         ["11-02-2025_10-24-56.csv"] = new List<int>() { 0, 1, 5, 6 },
-        ["11-02-2025_11-43-22.csv"] = new List<int>() { 0, 1, 5, 6, 2 },
-        ["11-02-2025_13-52-54.csv"] = new List<int>() { 0, 1, 6, 2 },
+        ["11-02-2025_11-43-22.csv"] = new List<int>() { 0, 1, 5, 2, 6 },
+        ["11-02-2025_13-52-54.csv"] = new List<int>() { 0, 1, 2, 6 },
         ["16-12-2024_14-07-40.csv"] = new List<int>() { 0, 1, 6 },
-        ["19-12-2024_11-54-36.csv"] = new List<int>() { 0, 1, 3, 6, 2 },
+        ["19-12-2024_11-54-36.csv"] = new List<int>() { 0, 1, 3, 2, 6 },
         ["23-03-2025_21-33-31.csv"] = new List<int>() { 0, 1, 5, 3, 2, 4, 6 }, //jeste baze mezi 4 a 6, mozna i mezi 2 a 4
-        ["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 } //nejake baze mezi;
+        ["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 }, //nejake baze mezi;
+        ["03-04-2025_17-02-37.csv"] = new List<int>() { 0, 2, 1, 6 },
+        ["03-04-2025_17-27-39.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 }
     };
 
     List<Vector3> positions;
@@ -101,6 +103,7 @@ public class Player : MonoBehaviour
     private float time = 0f;
 
     public int replaySpeed = 1;
+    public int currentLineCount = 0;
     private StreamReader reader;
     [SerializeField]
     private GameObject insideSpot;
@@ -212,8 +215,13 @@ public class Player : MonoBehaviour
         }
         else
         {
-            for (int i = 1; i < replaySpeed; i++) reader.ReadLine();
+            for (int i = 1; i < replaySpeed; i++)
+            {
+                currentLineCount++;
+                reader.ReadLine();
+            }
             string currentLine = reader.ReadLine();
+            currentLineCount++;
             if (currentLine == null) return;
             string[] currentValues = currentLine.Split(',');
             if (currentValues.Length != 18) return;
@@ -252,6 +260,9 @@ public class Player : MonoBehaviour
             Vector3 currentTargetPos = positions[ordering[fileName.Split('\\')[1]][int.Parse(currentValues[16], CultureInfo.InvariantCulture)]];
             if (Vector3.Distance(currentTargetPos, transform.position) <= 250f) Debug.DrawLine(transform.position, currentTargetPos, Color.green);
             else Debug.DrawLine(transform.position, currentTargetPos, Color.red);
+            Vector3 targetVector = Vector3.Normalize(currentTargetPos - transform.position);
+            //Debug.DrawLine(transform.position, transform.position + new Vector3(0, transform.forward.y, transform.forward.z) * 20, Color.blue);
+            //Debug.DrawLine(transform.position, transform.position + new Vector3(0, targetVector.y, targetVector.z) * 20, Color.blue);
             Vector3 rotationVector = transform.forward;
             currentAngle = Vector3.Angle(rotationVector, Vector3.Normalize(currentTargetPos - transform.position));
         }

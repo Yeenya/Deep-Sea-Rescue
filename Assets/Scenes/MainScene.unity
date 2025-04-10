@@ -1601,7 +1601,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 350, y: -350}
+  m_AnchoredPosition: {x: 350, y: -500}
   m_SizeDelta: {x: 200, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &194023464
@@ -1948,7 +1948,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d086388134362a47a481c53b4549fcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentAngle: 0
   maxVelocity: 0
+  savedDivers: 0
   rotorSound: {fileID: 119582097}
   terrainParticles: {fileID: 459572641}
   terrainDragSound: {fileID: 459572642}
@@ -1962,6 +1964,7 @@ MonoBehaviour:
   dockingAudio: {fileID: 212990279}
   gameOver: 0
   replaySpeed: 1
+  currentLineCount: 0
   insideSpot: {fileID: 956250956}
   state: 1
   baseSonar: {fileID: 753622732}
@@ -15425,7 +15428,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 700, y: 700}
+  m_SizeDelta: {x: 700, y: 1000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1427196895
 MonoBehaviour:

@@ -22,12 +22,16 @@ public class DataProcessing : MonoBehaviour
     {
         Dictionary<string, List<int>> ordering = new();
         ordering["11-02-2025_10-24-56.csv"] = new List<int>() { 0, 1, 5, 6 };
-        ordering["11-02-2025_11-43-22.csv"] = new List<int>() { 0, 1, 5, 6, 2 };
-        ordering["11-02-2025_13-52-54.csv"] = new List<int>() { 0, 1, 6, 2 };
+        ordering["11-02-2025_11-43-22.csv"] = new List<int>() { 0, 1, 5, 2, 6 };
+        ordering["11-02-2025_13-52-54.csv"] = new List<int>() { 0, 1, 2, 6 };
         ordering["16-12-2024_14-07-40.csv"] = new List<int>() { 0, 1, 6 };
-        ordering["19-12-2024_11-54-36.csv"] = new List<int>() { 0, 1, 3, 6, 2 };
+        ordering["19-12-2024_11-54-36.csv"] = new List<int>() { 0, 1, 3, 2, 6 };
         ordering["23-03-2025_21-33-31.csv"] = new List<int>() { 0, 1, 5, 3, 2, 4, 6 }; //jeste baze mezi 4 a 6, mozna i mezi 2 a 4
         ordering["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 }; //nejake baze mezi
+        ordering["27-03-2025_10-15-21.csv"] = new List<int>() { 0, 5, 1, 4, 2, 3, 6};
+        ordering["28-03-2025_13-08-25.csv"] = new List<int>() { 0, 1, 5, 2, 3, 6 };
+        ordering["03-04-2025_17-02-37.csv"] = new List<int>() { 0, 2, 1, 6 };
+        ordering["03-04-2025_17-27-39.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 };
 
         List<Vector3> positions = new List<Vector3>() { testingDiverPos, diver1Pos, diver2Pos, diver3Pos, diver4Pos, diver5Pos, basePos };
 
@@ -47,13 +51,14 @@ public class DataProcessing : MonoBehaviour
             {
                 lines++;
                 string[] data = reader.ReadLine().Split(',');
-                if (data.Length < 9) break;
+                if (data.Length < 17) break;
                 Vector3 pos = new(float.Parse(data[0], CultureInfo.InvariantCulture), float.Parse(data[1], CultureInfo.InvariantCulture), float.Parse(data[2], CultureInfo.InvariantCulture));
                 //float distance = float.Parse(data[3]);
                 //float time = float.Parse(data[4]);
                 Quaternion rotation = new(float.Parse(data[5], CultureInfo.InvariantCulture), float.Parse(data[6], CultureInfo.InvariantCulture), float.Parse(data[7], CultureInfo.InvariantCulture), float.Parse(data[8], CultureInfo.InvariantCulture));
+                if (!int.TryParse(data[16], out _)) break;
                 int savedDivers = int.Parse(data[16]);
-
+                if (savedDivers >= ordering[fileName.Split('\\')[1]].Count) print(fileName + " " + savedDivers);
                 Vector3 currentTargetPos = positions[ordering[fileName.Split('\\')[1]][savedDivers]];
                 Vector3 forwardVector = rotation * Vector3.forward;
                 Vector3 targetVector = Vector3.Normalize(currentTargetPos - pos);
@@ -70,7 +75,7 @@ public class DataProcessing : MonoBehaviour
 
             reader.Close();
 
-            File.Create(Application.persistentDataPath + "/Data/Processed/" + fileName.Split('\\')[1].Split('.')[0] + ".txt").Close();
+            //File.Create(Application.persistentDataPath + "/Data/Processed/" + fileName.Split('\\')[1].Split('.')[0] + ".txt").Close();
             StreamWriter writer = new(Application.persistentDataPath + "/Data/Processed/" + fileName.Split('\\')[1].Split('.')[0] + "_processed.csv");
             writer.Flush();
             for(int i = 0; i < angles.Count; i++)
