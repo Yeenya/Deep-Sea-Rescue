@@ -260,6 +260,8 @@ def calculate_values(name, data, processed_data):
     standing_still_percentage = 0
     backing_towards_target_percentage = 0
     average_approach_per_second = 0
+
+    facing_target_curve = np.zeros(181)
     
     ### Helper variables
     last_distance_to_diver = processed_data[0][3]
@@ -288,6 +290,9 @@ def calculate_values(name, data, processed_data):
         if last_divers_saved == divers_saved:
             average_approach_per_second += last_distance_to_diver - distance_to_diver
         
+        ### Facing target curve
+        facing_target_curve[round(angle)] += 1
+
         ### Update helper variables
         last_distance_to_diver = distance_to_diver
         last_divers_saved = divers_saved
@@ -324,6 +329,20 @@ def calculate_values(name, data, processed_data):
 
     average_approach_per_second = calculate_per_second(average_approach_per_second, processed_data.shape[0], decimals=3)
     print(f"Average approach per second: {average_approach_per_second}")
+
+
+    total_angles = np.sum(facing_target_curve)
+    percentage_facing_target_curve = (facing_target_curve / total_angles) * 100
+    #brat nejak v potaz, kdy se hrac nehybe, tak spis treba prumerovat tu danou hodnotu, no proste s tim neco vole udelej
+    plt.figure(figsize=(12, 6))
+    plt.plot(np.arange(len(percentage_facing_target_curve)), percentage_facing_target_curve, color='blue', linewidth=2)
+
+    plt.xlabel('Angle (degrees)')
+    plt.ylabel('Percentage (%)')
+    plt.title('Distribution of Angular Differences')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
     print("\n")
 
