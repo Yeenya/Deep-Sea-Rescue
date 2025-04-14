@@ -246,7 +246,7 @@ def plot_angular_difference_unity(name):
         fig.legend(loc='lower center', bbox_to_anchor=(0.5, -0.05), ncol=2)
         #plt.savefig(naming[name.split('\\')[-1]] + "_" + str(i + 1) + ".png", bbox_inches='tight')
 
-def calculate_values(name, data, processed_data):
+def calculate_values(name, data, processed_data, print_values=True):
     data = np.transpose(data)
     processed_data = np.transpose(processed_data)
 
@@ -299,49 +299,74 @@ def calculate_values(name, data, processed_data):
 
     angle_mean = round(np.mean(processed_data[:, 0]), 2)
     angle_std = round(np.std(processed_data[:, 0]), 2)
-    print(f"Angle mean: {angle_mean}°, Angle std: {angle_std}°")
 
     horizontal_angle_mean = round(np.mean(processed_data[:, 1]), 2)
     horizontal_angle_std = round(np.std(processed_data[:, 1]), 2)
-    print(f"    Horizontal angle mean: {horizontal_angle_mean}°, Horizontal angle std: {horizontal_angle_std}°")
 
     vertical_angle_mean = round(np.mean(processed_data[:, 2]), 2)
     vertical_angle_std = round(np.std(processed_data[:, 2]), 2)
-    print(f"    Vertical angle mean: {vertical_angle_mean}°, Vertical angle std: {vertical_angle_std}°")
     
     facing_target_percentage = calculate_percentage(facing_target_percentage, processed_data.shape[0])
-    print(f"Facing target percentage: {facing_target_percentage} %")
 
     facing_target_horizontally_percentage = calculate_percentage(facing_target_horizontally_percentage, processed_data.shape[0])
-    print(f"    Facing target horizontally percentage: {facing_target_horizontally_percentage} %")
 
     facing_target_vertically_percentage = calculate_percentage(facing_target_vertically_percentage, processed_data.shape[0])
-    print(f"    Facing target vertically percentage: {facing_target_vertically_percentage} %")
 
     moving_towards_target_percentage = calculate_percentage(moving_towards_target_percentage, processed_data.shape[0])
-    print(f"Moving towards target percentage: {moving_towards_target_percentage} %")
 
     backing_towards_target_percentage = calculate_percentage(backing_towards_target_percentage, processed_data.shape[0])
-    print(f"    Backing towards target percentage: {backing_towards_target_percentage} %, relative to moving towards target: {round(backing_towards_target_percentage / moving_towards_target_percentage * 100, 2)} %")
 
     standing_still_percentage = calculate_percentage(standing_still_percentage, processed_data.shape[0])
-    print(f"Standing still percentage: {standing_still_percentage} %")
 
     average_approach_per_second = calculate_per_second(average_approach_per_second, processed_data.shape[0], decimals=3)
-    print(f"Average approach per second: {average_approach_per_second}")
 
+    if print_values:
+        print(f"Angle mean: {angle_mean}°, Angle std: {angle_std}°")
+        print(f"    Horizontal angle mean: {horizontal_angle_mean}°, Horizontal angle std: {horizontal_angle_std}°")
+        print(f"    Vertical angle mean: {vertical_angle_mean}°, Vertical angle std: {vertical_angle_std}°")
+        print(f"Facing target percentage: {facing_target_percentage} %")
+        print(f"    Facing target horizontally percentage: {facing_target_horizontally_percentage} %")
+        print(f"    Facing target vertically percentage: {facing_target_vertically_percentage} %")
+        print(f"Moving towards target percentage: {moving_towards_target_percentage} %")
+        print(f"    Backing towards target percentage: {backing_towards_target_percentage} %, relative to moving towards target: {round(backing_towards_target_percentage / moving_towards_target_percentage * 100, 2)} %")
+        print(f"Standing still percentage: {standing_still_percentage} %")
+        print(f"Average approach per second: {average_approach_per_second}")
 
     total_angles = np.sum(facing_target_curve)
-    percentage_facing_target_curve = (facing_target_curve / total_angles) * 100
+    angular_diff_distribution = (facing_target_curve / total_angles) * 100
     #brat nejak v potaz, kdy se hrac nehybe, tak spis treba prumerovat tu danou hodnotu, no proste s tim neco vole udelej
-    plt.figure(figsize=(12, 6))
-    plt.plot(np.arange(len(percentage_facing_target_curve)), percentage_facing_target_curve, color='blue', linewidth=2)
+    percentage_facing_target = np.copy(facing_target_curve)
+    for i in range(np.shape(percentage_facing_target)[0]):
+        percentage_facing_target[i] = np.sum(facing_target_curve[:i]) / total_angles * 100
 
-    plt.xlabel('Angle (degrees)')
-    plt.ylabel('Percentage (%)')
-    plt.title('Distribution of Angular Differences')
-    plt.grid(True)
-    plt.tight_layout()
+    fig = plt.figure(figsize=(25, 12))
+    ax = fig.add_subplot(121)
+    ax.plot(np.arange(len(angular_diff_distribution)), angular_diff_distribution, color='blue', linewidth=2, label='Percentage of time')
+    ax2 = ax.twinx()
+    ax2.plot(np.arange(len(percentage_facing_target)), percentage_facing_target, color='red', linewidth=2, label='Cumulative percentage')
+    ax2.set_ylabel('Cumulative percentage (%)')
+    ax.set_xlabel('Angle (degrees)')
+    ax.set_ylabel('Percentage (%)')
+    ax.set_title('Percentage of time in angular differences')
+    ax.grid(True)
+    fig.tight_layout()
+    handles1, labels1 = ax.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+
+    # Combine them
+    all_handles = handles1 + handles2
+    all_labels = labels1 + labels2
+
+    # Add a single, smaller, top-left legend inside the plot area
+    fig.legend(
+        all_handles, all_labels,
+        loc='upper left',
+        bbox_to_anchor=(0.075, 0.9),  # adjust position inside plot
+        fontsize=20,
+        markerscale=1.6,
+        handlelength=3,
+        frameon=True
+    )
     plt.show()
 
     print("\n")
@@ -366,6 +391,6 @@ for file_path in csv_files:
     #plot_trajectory(data, file_path)
     #plot_angular_difference_unity(processed_csv_files[counter])
 
-    calculate_values(name, data, processed_data)
+    calculate_values(name, data, processed_data, print_values=False)
 
     counter += 1
