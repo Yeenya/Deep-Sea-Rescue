@@ -30,7 +30,8 @@ public class Player : MonoBehaviour
         ["23-03-2025_21-33-31.csv"] = new List<int>() { 0, 1, 5, 3, 2, 4, 6 }, //jeste baze mezi 4 a 6, mozna i mezi 2 a 4
         ["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 }, //nejake baze mezi;
         ["03-04-2025_17-02-37.csv"] = new List<int>() { 0, 2, 1, 6 },
-        ["03-04-2025_17-27-39.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 }
+        ["03-04-2025_17-27-39.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 },
+        ["13-04-2025_20-40-37.csv"] = new List<int>() { 0, 1, 5, 4, 2, 6 }
     };
 
     List<Vector3> positions;

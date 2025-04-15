@@ -32,6 +32,7 @@ public class DataProcessing : MonoBehaviour
         ordering["28-03-2025_13-08-25.csv"] = new List<int>() { 0, 1, 5, 2, 3, 6 };
         ordering["03-04-2025_17-02-37.csv"] = new List<int>() { 0, 2, 1, 6 };
         ordering["03-04-2025_17-27-39.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 };
+        ordering["13-04-2025_20-40-37.csv"] = new List<int>() { 0, 1, 5, 4, 2, 6};
 
         List<Vector3> positions = new List<Vector3>() { testingDiverPos, diver1Pos, diver2Pos, diver3Pos, diver4Pos, diver5Pos, basePos };
 
