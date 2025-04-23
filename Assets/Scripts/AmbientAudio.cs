@@ -1,6 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+/*
+ * Developed by Jan Borecký, 2024-2025
+ * This script plays ambient audio clips randomly on a loop
+ */
 
 public class AmbientAudio : MonoBehaviour
 {
@@ -10,13 +14,17 @@ public class AmbientAudio : MonoBehaviour
     [SerializeField]
     private AudioClip[] ambientClips;
 
+    [SerializeField]
     private float delay = 3f;
 
     void Start()
     {
-        StartCoroutine(PlayAudio(5));
+        StartCoroutine(PlayAudio(5)); // Start with a random delay before the first audio clip
     }
 
+    /*
+     * A recursive coroutine handling the audio loop.
+     */
     private IEnumerator PlayAudio(float audioLength)
     {
         yield return new WaitForSeconds(audioLength + Random.value * audioLength * delay);

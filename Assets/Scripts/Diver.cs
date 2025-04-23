@@ -1,9 +1,11 @@
 using DG.Tweening;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Developed by Jan Borecký, 2024-2025
+ * This script handles the diver behavior.
+ */
 public class Diver : MonoBehaviour
 {
     AudioSource sonarSound;
@@ -20,15 +22,25 @@ public class Diver : MonoBehaviour
         UpdateSound();
     }
 
+    /*
+     * Update the sound pitch based on the distance to the player.
+     */
     public void UpdateSound()
     {
         float distance = Vector3.Distance(transform.position, player.transform.position);
+
+        // If the player is outside, no sound is emitted.
         if (distance <= sonarSound.maxDistance && cameraController.GetInsideOrOutside()) sonarSound.volume = 1;
         else sonarSound.volume = 0;
+
+        // Modify the pitch based on the distance to the player combined with easeInSine function used as easing.
         float nonModifiedPitch = (sonarSound.maxDistance - distance) / sonarSound.maxDistance;
         sonarSound.pitch = (1 - Mathf.Cos(nonModifiedPitch * Mathf.PI / 2)) * 2 + 1; //easeInSine from https://easings.net/#easeInSine
     }
 
+    /*
+     * Setup the sound and get correct references
+     */
     public void Init()
     {
         sonarSound = GetComponent<AudioSource>();
@@ -37,6 +49,9 @@ public class Diver : MonoBehaviour
         cameraController = Camera.main.GetComponent<CameraController>();
     }
 
+    /*
+     * If diver is in range of the submarine, play running animation (which looks like jumping) and smoothly move to the submarine.
+     */
     public void GetSaved(Vector3 submarinePosition)
     {
         GetComponent<Animator>().SetBool("isRunning", true);
@@ -44,6 +59,9 @@ public class Diver : MonoBehaviour
         StartCoroutine(GetSavedCoroutine());
     }
 
+    /*
+     * Coroutine to destroy the diver after 1 second delay.
+     */
     private IEnumerator GetSavedCoroutine()
     {
         yield return new WaitForSeconds(1);

@@ -5,11 +5,12 @@ using DG.Tweening;
 using TMPro;
 using System.IO;
 using System;
-using System.Text;
 using System.Globalization;
-using Unity.VisualScripting;
-using static UnityEditor.PlayerSettings;
 
+/*
+ * Developed by Jan Borecký, 2024-2025
+ * This script handles the Player and everything related.
+ */
 public class Player : MonoBehaviour
 {
     private Vector3 testingDiverPos = new Vector3(212.271439f, 119.490868f, 219.693787f);
@@ -20,25 +21,29 @@ public class Player : MonoBehaviour
     private Vector3 diver5Pos = new Vector3(427.019989f, 60.6500015f, 438.25f);
     private Vector3 basePos = new Vector3(207.893082f, 131.025192f, 187.043793f);
 
-    Dictionary<string, List<int>> ordering = new()
+    public readonly static Dictionary<string, List<int>> ordering = new()
     {
+        // Order in which each of the players collected the divers. In future, this should be loaded from the replay.
         ["11-02-2025_10-24-56.csv"] = new List<int>() { 0, 1, 5, 6 },
         ["11-02-2025_11-43-22.csv"] = new List<int>() { 0, 1, 5, 2, 6 },
         ["11-02-2025_13-52-54.csv"] = new List<int>() { 0, 1, 2, 6 },
         ["16-12-2024_14-07-40.csv"] = new List<int>() { 0, 1, 6 },
         ["19-12-2024_11-54-36.csv"] = new List<int>() { 0, 1, 3, 2, 6 },
-        ["23-03-2025_21-33-31.csv"] = new List<int>() { 0, 1, 5, 3, 2, 4, 6 }, //jeste baze mezi 4 a 6, mozna i mezi 2 a 4
-        ["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 }, //nejake baze mezi;
+        ["23-03-2025_21-33-31.csv"] = new List<int>() { 0, 1, 5, 3, 2, 4, 6 },
+        ["25-03-2025_19-17-19.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 },
         ["03-04-2025_17-02-37.csv"] = new List<int>() { 0, 2, 1, 6 },
         ["03-04-2025_17-27-39.csv"] = new List<int>() { 0, 1, 5, 2, 4, 3, 6 },
-        ["13-04-2025_20-40-37.csv"] = new List<int>() { 0, 1, 5, 4, 2, 6 }
+        ["13-04-2025_20-40-37.csv"] = new List<int>() { 0, 1, 5, 4, 2, 6 },
+        ["17-04-2025_14-32-41.csv"] = new List<int>() { 0, 1, 5, 5},
+        ["17-04-2025_14-51-13.csv"] = new List<int>() { 0, 1, 5, 2, 3, 4, 6},
+        ["21-04-2025_19-31-35.csv"] = new List<int>() { 0, 1, 5, 4, 2, 3, 6}
     };
 
-    List<Vector3> positions;
+    private List<Vector3> positions;
+    private string fileName;
 
-    string fileName;
-    public float currentAngle;
-
+    [SerializeField]
+    private float currentAngle; // Used just for debugging purposed. Visible in the Inspector to check that the angle is calculated correctly.
 
     private float velocity;
     [Range(3, 15)]
@@ -109,12 +114,15 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject insideSpot;
 
+    /*
+     * Describes the state of the player.
+     */
     public enum State
     {
-        FREE,
-        DOCKED,
-        REPLAY,
-        TUTORIAL
+        FREE, // The player is undocked and freely moving throughout the scene.
+        DOCKED, // The player is docked.
+        REPLAY, // The player is reviewing a replay.
+        TUTORIAL // The player is just doing the tutorial.
     }
 
     public State state = State.DOCKED;
@@ -124,11 +132,13 @@ public class Player : MonoBehaviour
     private bool baseSonarPlaying = false;
     private bool tiltDelayActive = false;
 
+    // Pitch values for a major scale (1 is the root note)
     public static readonly float[] majorScalePitch =
     {
         1f, 1.122462f, 1.259921f, 1.334840f, 1.498307f, 1.681793f, 1.887749f, 2f, 2.244924f, 2.519842f, 2.669680f, 2.996614f, 3.363586f, 3.775498f, 4f
     };
 
+    // Midpoints between the major scale pitch values. Used for clamping to the closest note.
     public static readonly float[] majorScalePitchMidpoints =
     {
         1.061231f, 1.191192f, 1.297381f, 1.416574f, 1.590050f, 1.784771f, 1.943874f, 2.122462f, 2.382383f, 2.594761f, 2.833147f, 3.180100f, 3.569542f, 3.887749f
@@ -136,6 +146,8 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        // Set variables to default values.
+
         positions = new List<Vector3>() { testingDiverPos, diver1Pos, diver2Pos, diver3Pos, diver4Pos, diver5Pos, basePos };
 
         velocity = 0f;
@@ -160,8 +172,10 @@ public class Player : MonoBehaviour
 
         lastPosition = transform.position;
 
+        // If the player is playing in a build, prepare the replay files. There is a bug that even if you play in the editor, the files are created,
+        // so you can easily "spam" your folder with many almost empty data files. Comment the line calling WriteFilesIfNeccessary function if needed.
 #if UNITY_STANDALONE
-        //WriteFilesIfNeccessary();
+        WriteFilesIfNeccessary();
 #endif
     }
 
@@ -187,17 +201,21 @@ public class Player : MonoBehaviour
         }
         else if (state == State.REPLAY)
         {
+            // In replay, the player can freely change inside or outside view and the speed of the replay. Everything else is driven by the replay itself.
             if (Input.GetKeyDown(KeyCode.Tab)) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
             if (Input.GetKeyDown(KeyCode.KeypadPlus) && replaySpeed < 20) replaySpeed++;
             if (Input.GetKeyDown(KeyCode.KeypadMinus) && replaySpeed > 1) replaySpeed--;
         }
     }
 
+    /*
+     * FixedUpdate is used for writing / reading replay data.
+     */
     void FixedUpdate()
     {
-        if (state != State.REPLAY)
+        if (state != State.REPLAY) // Player is normally playing.
         {
-            if (!filesWritten) return;
+            if (!filesWritten) return; // If data files were not (correctly) prepared, do not write anything.
             distance += Vector3.Distance(lastPosition, transform.position);
             lastPosition = transform.position;
             time += Time.fixedDeltaTime;
@@ -214,8 +232,9 @@ public class Player : MonoBehaviour
             log += ReplaceDecimal(electricity);
             writer.WriteLine(log);
         }
-        else
+        else // Player is viewing a replay.
         {
+            // Skip as many lines as the replay speed is set to.
             for (int i = 1; i < replaySpeed; i++)
             {
                 currentLineCount++;
@@ -223,9 +242,11 @@ public class Player : MonoBehaviour
             }
             string currentLine = reader.ReadLine();
             currentLineCount++;
-            if (currentLine == null) return;
+            if (currentLine == null) return; // If the line is null, stop for safety reasons.
             string[] currentValues = currentLine.Split(',');
-            if (currentValues.Length != 18) return;
+            if (currentValues.Length != 18) return; // If the data line does not contain all data it should, stop for safety reasons.
+
+            // Set the submarine to its correct position, rotation, set its lights and tilt model.
 
             Vector3 position;
             position.x = float.Parse(currentValues[0], CultureInfo.InvariantCulture);
@@ -257,35 +278,56 @@ public class Player : MonoBehaviour
 
             tiltModel.transform.localRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, 0, 0));
 
+
+            // Draw a debug line which is from the submarine to the diver which is going to be saved next (or base at the end).
+            // The line is green if the submarine is close enough to hear the diver, red otherwise.
             savedDivers = int.Parse(currentValues[16], CultureInfo.InvariantCulture);
             Vector3 currentTargetPos = positions[ordering[fileName.Split('\\')[1]][int.Parse(currentValues[16], CultureInfo.InvariantCulture)]];
             if (Vector3.Distance(currentTargetPos, transform.position) <= 250f) Debug.DrawLine(transform.position, currentTargetPos, Color.green);
             else Debug.DrawLine(transform.position, currentTargetPos, Color.red);
-            Vector3 targetVector = Vector3.Normalize(currentTargetPos - transform.position);
+
+            //If necessary, uncomment to draw a flattened lines to show the horizontal angle between the submarine facing direction and
+            //the direction to the diver going to be saved. Used just for debugging purposes.
+            //Vector3 targetVector = Vector3.Normalize(currentTargetPos - transform.position);
             //Debug.DrawLine(transform.position, transform.position + new Vector3(0, transform.forward.y, transform.forward.z) * 20, Color.blue);
             //Debug.DrawLine(transform.position, transform.position + new Vector3(0, targetVector.y, targetVector.z) * 20, Color.blue);
+
+            // Compute the current angle between the submarine facing direction and the direction to the diver going to be saved. Used just for debugging purposes.
             Vector3 rotationVector = transform.forward;
             currentAngle = Vector3.Angle(rotationVector, Vector3.Normalize(currentTargetPos - transform.position));
         }
     }
 
+    /*
+     * Replace decimal separator in the float number with a dot for CSV compatibilty of float values.
+     */
     private string ReplaceDecimal(float number)
     {
         return number.ToString().Replace(',', '.');
     }
 
+    /*
+     * Custom ToString function for Vector3s. It replaces the decimal separator with a dot for CSV compatibility.
+     */
     private string Vector3ToString(Vector3 vector)
     {
         string result = ReplaceDecimal(vector.x) + "," + ReplaceDecimal(vector.y) + "," + ReplaceDecimal(vector.z);
         return result;
     }
 
+    /*
+     * Custom ToString function for Quaternions. It replaces the decimal separator with a dot for CSV compatibility.
+     */
     private string QuaternionToString(Quaternion quaternion)
     {
         string result = ReplaceDecimal(quaternion.x) + "," + ReplaceDecimal(quaternion.y) + "," + ReplaceDecimal(quaternion.z) + "," + ReplaceDecimal(quaternion.w);
         return result;
     }
 
+    /*
+     * Check for player input and move the submarine accordingly.
+     * Also constrain the rotation, velocity etc.
+     */
     private void MoveSubmarine()
     {
         // Forward/backward
@@ -322,21 +364,25 @@ public class Player : MonoBehaviour
         transform.Rotate(new Vector3(verticalRotationSpeed, horizontalRotationSpeed, 0) * Time.deltaTime);
         transform.Rotate(0, 0, -transform.rotation.eulerAngles.z);
 
-        // Limit x rotation so that player doesn't spin to infinity
+        // Limit x rotation so that player doesn't spin to infinity (If the player is facing completely up or down, the spinning is broken and insanely fast.)
         Vector3 correctRotation = transform.rotation.eulerAngles;
         if (correctRotation.x > 80 && correctRotation.x < 180) correctRotation.x = 80;
         if (correctRotation.x < 280 && correctRotation.x > 180) correctRotation.x = 280;
         transform.rotation = Quaternion.Euler(correctRotation);
 
+        // Reset rotation of the player so that the submarine "lies flat" - is aligned with the horizontal plane.
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)) transform.rotation = Quaternion.Euler(0, correctRotation.y, correctRotation.z);
 
-        rotor.transform.Rotate(0, 0.5f + velocity * 2f, 0);
+        rotor.transform.Rotate(0, 0.5f + velocity * 2f, 0); // Rotate the rotor at the back of the submarine according to the speed. Just a visual feature.
 
-        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        GetComponent<Rigidbody>().velocity = Vector3.zero; // Because the movement is not done through Rididbody, eliminate any velocity possibly added to the Rigidbody.
 
-        tiltModel.transform.localRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, 0, 0));
+        tiltModel.transform.localRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, 0, 0)); // Tilt the model according to the tilt of the submarine.
     }
 
+    /*
+     * Do not let the player go outside of the map. The numbers are hardcoded for map size 500 x 500.
+     */
     private void ConstrainMove()
     {
         if (transform.position.x > 490) transform.position = new Vector3(490, transform.position.y, transform.position.z);
@@ -346,6 +392,9 @@ public class Player : MonoBehaviour
         else if (transform.position.z < 10) transform.position = new Vector3(transform.position.x, transform.position.y, 10);
     }
 
+    /*
+     * Check whether player pressed any of the keys outside of moving keys.
+     */
     private void CheckInput()
     {
         if (Input.GetKeyDown(KeyCode.Tab)) Camera.main.GetComponent<CameraController>().ChangeCameraPosition();
@@ -360,6 +409,9 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T)) StartCoroutine(GetComponent<AudioTutorial>().Tutorial());
     }
 
+    /*
+     * Turn the main light (facing forward) on or off.
+     */
     private void ChangeMainLight()
     {
         if (periscopeLight.intensity == 0)
@@ -376,6 +428,9 @@ public class Player : MonoBehaviour
         mainLightOn = !mainLightOn;
     }
 
+    /*
+     * Turn the left light on or off.
+     */
     private void ChangeLeftLight()
     {
         if (leftLight.intensity == 0) leftLight.DOIntensity(additionalLightsMaxIntensity, 0.5f);
@@ -383,6 +438,9 @@ public class Player : MonoBehaviour
         leftLightOn = !leftLightOn;
     }
 
+    /*
+     * Turn the right light on or off.
+     */
     private void ChangeRightLight()
     {
         if (rightLight.intensity == 0) rightLight.DOIntensity(additionalLightsMaxIntensity, 0.5f);
@@ -390,6 +448,9 @@ public class Player : MonoBehaviour
         rightLightOn = !rightLightOn;
     }
 
+    /*
+     * Drain electricity according to the number of lights on.
+     */
     private void ChangeElectricity()
     {
         if (state == State.FREE)
@@ -398,9 +459,9 @@ public class Player : MonoBehaviour
             if (mainLightOn) coefficient += 1;
             if (leftLightOn) coefficient += 0.5f;
             if (rightLightOn) coefficient += 0.5f;
-            //electricity -= Time.deltaTime * coefficient;
+            //electricity -= Time.deltaTime * coefficient; // For testing purposes, the electricity is not drained. Uncomment to add time constrain to the player's experience.
         }
-        else if (state == State.DOCKED && chargedElectricity < maxElectricity / 2)
+        else if (state == State.DOCKED && chargedElectricity < maxElectricity / 2) // If the player is docked, charge some limited amount of electricity.
         {
             float addition = Time.deltaTime * 5f;
             electricity += addition;
@@ -410,6 +471,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        // If the player is colliding with the terrain, play the terrain drag sound and start the ParticleSystem of sand.
         if (collision.gameObject.CompareTag("Terrain"))
         {
             terrainParticles.Play();
@@ -419,6 +481,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
+        // Handle the particles and drag sound when the player is still in contact with the terrain.
         if (collision.gameObject.CompareTag("Terrain"))
         {
             if (velocity == 0 && terrainParticles.isPlaying)
@@ -436,6 +499,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
+        // Stop the particles and drag sound when the player is no longer in contact with the terrain.
         if (collision.gameObject.CompareTag("Terrain"))
         {
             terrainParticles.Stop();
@@ -445,6 +509,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // Used only for debugging purposes, when testing whether the docking is correctly detected during tutorial.
         if (other.CompareTag("Tube"))
         {
             nearDock = true;
@@ -453,12 +518,16 @@ public class Player : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        // Used only for debugging purposes, when testing whether the docking is correctly detected during tutorial.
         if (other.CompareTag("Tube"))
         {
             nearDock = false;
         }
     }
 
+    /*
+     * Change the rotor sound and pitch according to the speed of the submarine.
+     */
     private void RotorAudio()
     {
         if (velocity == 0) rotorSound.Stop();
@@ -468,6 +537,9 @@ public class Player : MonoBehaviour
         rotorSound.volume = rotorSound.pitch / 5;
     }
 
+    /*
+     * Look if some diver is close enough to the submarine and if so, save him.
+     */
     private void RescueDiver()
     {
         GameObject[] divers = GameObject.FindGameObjectsWithTag("Diver");
@@ -482,6 +554,9 @@ public class Player : MonoBehaviour
         }
     }
 
+    /*
+     * Handle docking / undocking.
+     */
     private void BaseDock()
     {
         if (state == State.DOCKED)
@@ -497,7 +572,7 @@ public class Player : MonoBehaviour
             dockingAudio.Play();
             Transform dockPoint = GameObject.FindGameObjectWithTag("Tube").transform.GetChild(0);
             transform.SetPositionAndRotation(dockPoint.position, dockPoint.rotation);
-            if (savedDivers == 6)
+            if (savedDivers == 6) // If all divers are saved, show the win menu.
             {
                 gameWonMenu.SetActive(true);
                 Time.timeScale = 0f;
@@ -506,6 +581,9 @@ public class Player : MonoBehaviour
         }
     }
 
+    /*
+     * Handling the base pinging sound.
+     */
     private void BaseSonarAudio()
     {
         if (Input.GetKeyDown(KeyCode.E))
@@ -520,6 +598,9 @@ public class Player : MonoBehaviour
         }
     }
 
+    /*
+     * This function modifies the base pinging sound in the same way as divers do.
+     */
     private IEnumerator BaseSonarPing()
     {
         if (Camera.main.GetComponent<CameraController>().GetInsideOrOutside()) baseSonar.volume = 0.1f;
@@ -531,12 +612,16 @@ public class Player : MonoBehaviour
 
         baseSonar.Play();
 
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(5); // Wait five seconds before another ping.
         if (baseSonarPlaying) StartCoroutine(BaseSonarPing());
     }
 
+    /*
+     * This function handles the audio cue of tilting the submarine.
+     */
     private void TiltAudio()
     {
+        // Set the correct pitch (Because facing above horizontal plane return a totally different local rotation value than facing below horizontal plane.)
         float pitch;
         if (tiltModel.transform.localRotation.eulerAngles.x <= 81)
         {
@@ -547,8 +632,8 @@ public class Player : MonoBehaviour
             pitch = 2f + (360f - tiltModel.transform.localRotation.eulerAngles.x) / 40f;
         }
 
+        // Find the closest melodized pitch value.
         float melodizedPitch = majorScalePitch[0];
-
         for (int i  = 0; i < majorScalePitchMidpoints.Length; i++)
         {
             if (pitch > majorScalePitchMidpoints[i])
@@ -561,8 +646,9 @@ public class Player : MonoBehaviour
             }
         }
 
-        tiltModel.GetComponent<AudioSource>().pitch = pitch; //melodizedPitch;
+        tiltModel.GetComponent<AudioSource>().pitch = pitch; // swap to melodizedPitch if you want want melodized pitch throughout the whole tilting procedure.
 
+        // Play the tilt sound when tilting and also after tilting for some time so that player can properly analyze the sound.
         if (verticalRotationSpeed != 0)
         {
             tiltDelayActive = false;
@@ -571,17 +657,23 @@ public class Player : MonoBehaviour
         else if (!tiltDelayActive)
         {
             tiltDelayActive = true;
-            tiltModel.GetComponent<AudioSource>().pitch = melodizedPitch; //tiltModel.GetComponent<AudioSource>().DOPitch(melodizedPitch, 0.25f);
+            tiltModel.GetComponent<AudioSource>().pitch = melodizedPitch; // set the pitch to the melodized one when the player stopped tilting.
             StartCoroutine(TiltDelay());
         }
     }
 
+    /*
+     * A simple coroutine to mute the tilting sound after one second.
+     */
     private IEnumerator TiltDelay()
     {
         yield return new WaitForSeconds(1);
         tiltModel.GetComponent<AudioSource>().volume = 0f;
     }
 
+    /*
+     * Show the game over menu if the player runs out of electricity.
+     */
     private void GameOver()
     {
         if (!gameOverMenu.activeSelf)
@@ -594,10 +686,15 @@ public class Player : MonoBehaviour
         }
     }
 
+    /*
+     * A simple getter function for electricity.
+     */
     public float GetElectricity()
     {
         return electricity;
     }
+
+    // Wrappers for saving values into JSON files (for safety reasons and possible interference of JSON syntax with the syntax of vectors, quaternions etc.)
 
     [Serializable]
     public class PositionWrapper
@@ -623,15 +720,22 @@ public class Player : MonoBehaviour
         }
     }
 
+    /*
+     * A function called at the start of the game (if wanted) to prepare the data files for the player.
+     */
     public void WriteFilesIfNeccessary()
     {
         if (filesWritten || state == State.REPLAY) return;
         filesWritten = true;
+
+        // Check if the Data directory exists, if not, create it.
         if (!Directory.Exists(Application.persistentDataPath + "/Data"))
         {
             Directory.CreateDirectory(Application.persistentDataPath + "/Data");
         }
-        using (writer = new StreamWriter(Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + "_Settings.json"))//csv"))
+
+        // Write the Settings JSON file.
+        using (writer = new StreamWriter(Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + "_Settings.json"))
         {
             PositionsWrapper list = new();
             list.wrappers.Add(new PositionWrapper(gameObject));
@@ -642,26 +746,11 @@ public class Player : MonoBehaviour
             list.wrappers.Add(new PositionWrapper(GameObject.Find("Diver5")));
             list.wrappers.Add(new PositionWrapper(GameObject.Find("TestingDiver")));
             writer.Write(JsonUtility.ToJson(list));
-            /* Old CSV way
-            writer.WriteLine(
-                "Submarine Position X,Submarine Position Y,Submarine Position Z," +
-                "Diver1 Position X,Diver1 Position Y,Diver1 Position Z," +
-                "Diver2 Position X,Diver2 Position Y,Diver2 Position Z," +
-                "Diver3 Position X,Diver3 Position Y,Diver3 Position Z," +
-                "Diver4 Position X,Diver4 Position Y,Diver4 Position Z," +
-                "Diver5 Position X,Diver5 Position Y,Diver5 Position Z," +
-                "Testing Diver Position X,Testing Diver Position Y,Testing Diver Position Z");
-            writer.WriteLine(Vector3ToString(transform.position) + ","
-                + Vector3ToString(GameObject.Find("Diver1").transform.position) + ","
-                + Vector3ToString(GameObject.Find("Diver2").transform.position) + ","
-                + Vector3ToString(GameObject.Find("Diver3").transform.position) + ","
-                + Vector3ToString(GameObject.Find("Diver4").transform.position) + ","
-                + Vector3ToString(GameObject.Find("Diver5").transform.position) + ","
-                + Vector3ToString(GameObject.Find("TestingDiver").transform.position));
-            */
         }
+
+        // Write the headers of the data CSV file.
         logFilePath = Application.persistentDataPath + "/Data/" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss") + ".csv";
-        File.WriteAllText(logFilePath, "");
+        File.WriteAllText(logFilePath, ""); // Flush the file if it already exists.
         writer = new StreamWriter(logFilePath);
         writer.WriteLine(
             "Position X,Position Y,Position Z," +
@@ -676,21 +765,27 @@ public class Player : MonoBehaviour
             "Electricity");
     }
 
+    /*
+     * Set a stream reader that is used for viewing a replay.
+     */
     public void SetStreamReader(string file)
     {
+        // Set file name and prepare the trajectory markers in the scene.
         fileName = file;
         GameObject markers = GameObject.Find("Markers");
         if (markers != null) Destroy(markers);
         markers = new GameObject("Markers");
         StreamReader markerReader = new(file);
-        markerReader.ReadLine();
+        markerReader.ReadLine(); // Skip the header line.
         while (!markerReader.EndOfStream)
         {
-            for (int i = 0; i < 49; i++) markerReader.ReadLine();
+            for (int i = 0; i < 49; i++) markerReader.ReadLine(); // A marker is placed for every 50th line of the data file, meaning one marker per second.
             string currentLine = markerReader.ReadLine();
-            if (currentLine == null) break;
+            if (currentLine == null) break; // safety break
             string[] currentValues = currentLine.Split(',');
-            if (currentValues.Length != 18) break;
+            if (currentValues.Length != 18) break; // safety break no. 2
+
+            // Create a marker and set its position and rotation.
 
             Vector3 position;
             position.x = float.Parse(currentValues[0], CultureInfo.InvariantCulture);
@@ -715,6 +810,9 @@ public class Player : MonoBehaviour
         reader.ReadLine();
     }
 
+    /*
+     * Read the settings from the JSON file and set the submarine and divers to their correct positions. Useful if you plan to change diver (or submarine) positions.
+     */
     public void SetSettings(string file)
     {
         if (file[..^5].Equals(".json"))
@@ -777,21 +875,33 @@ public class Player : MonoBehaviour
         }
     }
 
+    /*
+     * A simple getter function for diver prefab.
+     */
     public GameObject GetDiverPrefab()
     {
         return diverPrefab;
     }
 
+    /*
+     * A simple getter function for getting whether all lights are on. Used in the tutorial.
+     */
     public bool GetLightsOn()
     {
         return leftLightOn && mainLightOn && rightLightOn;
     }
 
+    /*
+     * A simple getter function for the number of currently saved divers.
+     */
     public int GetSavedDivers()
     {
         return savedDivers;
     }
 
+    /*
+     * A simple getter function for docking state.
+     */
     public bool IsDocked()
     {
         return state == State.DOCKED;

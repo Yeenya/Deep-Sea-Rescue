@@ -3,6 +3,13 @@ using System.Globalization;
 using System.IO;
 using UnityEngine;
 
+/*
+ * THIS FILE IS DEPRECATED AND NOT USED IN THE MOST RECENT VERSION
+ * 
+ * Developed by Jan Borecký, 2024-2025 
+ * This script was used to control the submarine in the replay mode. Now it is deprecated and done in the Player script.
+ * (No commenting in the code. You can also find it in the Player script.)
+ */
 public class ReplayPlayer : MonoBehaviour
 {
     private Light periscopeLight;

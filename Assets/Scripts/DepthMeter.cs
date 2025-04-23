@@ -1,9 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Windows.Speech;
 
+/*
+ * Developed by Jan Borecký, 2024-2025
+ * This script handles the depth meter bar which works in a similar way to the electricity bar.
+ */
 public class DepthMeter : MonoBehaviour
 {
     private Material depthMaterial;
@@ -40,6 +41,7 @@ public class DepthMeter : MonoBehaviour
         }
         depthMaterial.color = currentColor;
 
+        // Flash if the player gets too high (where nothing is)
         if (currentDepth > 170)
         {
             if (!GetComponent<AudioSource>().isPlaying && !player.GetComponent<Player>().gameOver) GetComponent<AudioSource>().Play();
@@ -57,6 +59,9 @@ public class DepthMeter : MonoBehaviour
         }
     }
 
+    /*
+     * A simple coroutine recursively enabling and disabling emission
+     */
     private IEnumerator Blink()
     {
         yield return new WaitForSeconds(0.5f);

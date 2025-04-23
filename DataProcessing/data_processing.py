@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import matplotlib as mpl
 from matplotlib.lines import Line2D
-from scipy.stats import chisquare
+from scipy.stats import ttest_ind
 
 mpl.rcParams['font.family'] = 'serif'
 
@@ -57,9 +57,21 @@ naming["03-04-2025_17-27-39_processed.csv"] = "SP_5" #"Sighted player 5"
 naming["03-04-2025_17-27-39.csv"] = "SP_5" #"Sighted player 5"
 naming["SP_5"] = "03-04-2025_17-27-39.csv"
 
-naming["13-04-2025_20-40-37_processed.csv"] = "SP_6" #"Sighted player 6"
-naming["13-04-2025_20-40-37.csv"] = "SP_6" #"Sighted player 6"
-naming["SP_6"] = "13-04-2025_20-40-37.csv"
+naming["13-04-2025_20-40-37_processed.csv"] = "SP_6_NS" #"Sighted player 6"
+naming["13-04-2025_20-40-37.csv"] = "SP_6_NS" #"Sighted player 6"
+naming["SP_6_NS"] = "13-04-2025_20-40-37.csv"
+
+naming["21-04-2025_19-31-35_processed.csv"] = "SP_6" #"Sighted player 6"
+naming["21-04-2025_19-31-35.csv"] = "SP_6" #"Sighted player 6"
+naming["SP_6"] = "21-04-2025_19-31-35.csv"
+
+naming["17-04-2025_14-32-41_processed.csv"] = "SP_7_NS" #"Sighted player 7 (no screen)"
+naming["17-04-2025_14-32-41.csv"] = "SP_7_NS" #"Sighted player 7 (no screen)"
+naming["SP_7_NS"] = "17-04-2025_14-32-41.csv"
+
+naming["17-04-2025_14-51-13_processed.csv"] = "SP_7" #"Sighted player 7"
+naming["17-04-2025_14-51-13.csv"] = "SP_7" #"Sighted player 7"
+naming["SP_7"] = "17-04-2025_14-51-13.csv"
 
 ordering = {}
 ordering["11-02-2025_10-24-56.csv"] = [0, 1, 5, 6]
@@ -74,6 +86,9 @@ ordering["28-03-2025_13-08-25.csv"] = [0, 1, 5, 2, 3, 6]
 ordering["03-04-2025_17-02-37.csv"] = [0, 2, 1, 6]
 ordering["03-04-2025_17-27-39.csv"] = [0, 1, 5, 2, 4, 3, 6]
 ordering["13-04-2025_20-40-37.csv"] = [0, 1, 5, 4, 2, 6]
+ordering["17-04-2025_14-32-41.csv"] = [0, 1, 5, 5]
+ordering["17-04-2025_14-51-13.csv"] = [0, 1, 5, 2, 3, 4, 6]
+ordering["21-04-2025_19-31-35.csv"] = [0, 1, 5, 4, 2, 3, 6]
 
 diver_positions = np.array([
     [212.271439,119.490868,219.693787],
@@ -172,7 +187,7 @@ def plot_trajectory(data, name):
     ax.set_zlabel('Y Position (m)', labelpad=30)
     ax.tick_params(pad=10)
 
-    distances = np.array(data[4], dtype=float)
+    distances = np.array(data[3], dtype=float)
     norm = mcolors.Normalize(vmin=np.min(distances), vmax=np.max(distances))
     colors = cmap(norm(distances[:-1]))
     mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
@@ -264,7 +279,7 @@ def plot_angular_difference_unity(name):
         ax_dist_vert.set_ylabel('Distance (m)')
 
         fig.legend(loc='lower center', bbox_to_anchor=(0.5, -0.05), ncol=2)
-        #plt.savefig(naming[name.split('\\')[-1]] + "_" + str(i + 1) + ".png", bbox_inches='tight')
+        plt.savefig(naming[name.split('\\')[-1]] + "_" + str(i + 1) + ".png", bbox_inches='tight')
 
 def calculate_values(name, data, processed_data, print_values=True, plot_values=True):
     data = np.transpose(data)
@@ -316,11 +331,11 @@ def calculate_values(name, data, processed_data, print_values=True, plot_values=
         if last_divers_saved == divers_saved:
             average_approach_per_second += last_distance_to_diver - distance_to_diver
             curr_time_for_diver += 0.02
+            if curr_time_for_diver > max_time_for_diver:
+                max_time_for_diver = curr_time_for_diver
         else:
             if curr_time_for_diver < min_time_for_diver:
                 min_time_for_diver = curr_time_for_diver
-            if curr_time_for_diver > max_time_for_diver:
-                max_time_for_diver = curr_time_for_diver
             curr_time_for_diver = 0
         
         ### Facing target curve
@@ -382,19 +397,26 @@ def calculate_values(name, data, processed_data, print_values=True, plot_values=
 
         fig = plt.figure(figsize=(25, 12))
         ax = fig.add_subplot(121)
-        ax.plot(np.arange(len(angular_diff_distribution)), angular_diff_distribution, color='blue', linewidth=2, label='Percentage of time')
-        ax2 = ax.twinx()
-        ax2.plot(np.arange(len(percentage_facing_target)), percentage_facing_target, color='red', linewidth=2, label='Cumulative percentage')
-        ax2.set_ylabel('Cumulative percentage (%)')
+        #ax.plot(np.arange(len(angular_diff_distribution)), angular_diff_distribution, color='blue', linewidth=2, label='Percentage of time')
+        bar_x = []
+        bar_y = []
+        for i in range(0, len(angular_diff_distribution) - 1, 30):
+            bar_x.append(str(i) + "° - " + str(i + 30) + "°")
+            bar_y.append(np.sum(angular_diff_distribution[i:i+30]))
+        ax.bar(range(6), bar_y)
+        ax.set_xticks(ticks=range(6), labels=bar_x, rotation=45, ha='center')
+        #ax2 = ax.twinx()
+        #ax2.plot(np.arange(len(percentage_facing_target)), percentage_facing_target, color='red', linewidth=2, label='Cumulative percentage')
+        #ax2.set_ylabel('Cumulative percentage (%)')
         ax.set_xlabel('Angle (degrees)')
         ax.set_ylabel('Percentage (%)')
         ax.set_title('Percentage of time angled towards target')
         ax.grid(True)
         fig.tight_layout()
         handles1, labels1 = ax.get_legend_handles_labels()
-        handles2, labels2 = ax2.get_legend_handles_labels()
-        all_handles = handles1 + handles2
-        all_labels = labels1 + labels2
+        #handles2, labels2 = ax2.get_legend_handles_labels()
+        all_handles = handles1# + handles2
+        all_labels = labels1# + labels2
         fig.legend(
             all_handles, all_labels,
             loc='upper left',
@@ -422,11 +444,13 @@ txt_files = glob.glob(os.path.join(script_dir + "/processed_data", "*.txt"))
 
 plt.rcParams.update({'font.size': 28})
 
-#data = load_csv_to_numpy(csv_files[1])
-#plot_trajectory(data, os.path.basename(csv_files[1]))
-#plot_angular_difference_unity(processed_csv_files[1])
+#data = load_csv_to_numpy(csv_files[10])
+#plot_trajectory(data, os.path.basename(csv_files[10]))
+#plot_angular_difference_unity(processed_csv_files[10])
 
-player_data = []
+vip_data = []
+sp_ns_data = []
+sp_data = []
 
 for i, file_path in enumerate(csv_files):
     name = naming[file_path.split('\\')[-1]]
@@ -435,55 +459,142 @@ for i, file_path in enumerate(csv_files):
     processed_data = load_csv_to_numpy(processed_csv_files[i])
 
     #plot_trajectory(data, file_path)
-    #plot_angular_difference_unity(processed_csv_files[counter])
+    #plot_angular_difference_unity(processed_csv_files[i])
 
-    calculated_values = calculate_values(name, data, processed_data, print_values=False, plot_values=False)
-    player_data.append([name] + calculated_values)
-
-
-avg_vip_time = 0
-vip_count = 0
-avg_sp_time = 0
-sp_count = 0
-for player in player_data:
-    if player[0][0] == "V":
-        avg_vip_time += player[14]
-        vip_count += 1
+    calculated_values = calculate_values(name, data, processed_data, print_values=True, plot_values=False)
+    if (name[0] == "V"):
+        vip_data.append(calculated_values)
+    elif (name[-1] == "S"):
+        sp_ns_data.append(calculated_values)
     else:
-        avg_sp_time += player[14]
-        sp_count += 1
-avg_vip_time /= vip_count
-avg_sp_time /= sp_count
-print("Average time for VIP: ", avg_vip_time)
-print("Average time for SP: ", avg_sp_time)
+        sp_data.append(calculated_values)
 
-'''
-epsilon = 1e-6  # small positive number
 
-results = []
+avg_vip_time = np.average([player[14] for player in vip_data])
 
-positions_for_plot = np.transpose(positions_for_plot)
+avg_sp_ns_time = np.average([player[14] for player in sp_ns_data])
 
-for row in player_data:
-    name = row[0]
-    measured = np.array(row[1:14], dtype=float)  # First 13 values
-    speed = 4.0
-    path = ordering[naming[name]]
-    if path is None:
-        continue
+avg_sp_time = np.average([player[14] for player in sp_data])
 
-    # Compute travel time
-    time = sum(euclidean(positions_for_plot[path[i]], positions_for_plot[path[i + 1]]) for i in range(len(path) - 1)) / speed
-    
-    # Replace 0s with epsilon
-    expected_raw = np.array([epsilon]*11 + [speed, time])
-    expected = expected_raw * (np.sum(measured) / np.sum(expected_raw))
+#print("Average time for VIP: ", avg_vip_time)
+#print("Average time for SP (no screen): ", avg_sp_ns_time)
+#print("Average time for SP: ", avg_sp_time)
 
-    # Chi-squared test
-    chi2_stat, p_val = chisquare(f_obs=measured, f_exp=expected)
-    results.append([name, chi2_stat, p_val])
+metric_names = [
+    "angle_average", "angle_std",
+    "horizontal_angle_average", "horizontal_angle_std",
+    "vertical_angle_average", "vertical_angle_std",
+    "facing_target_percentage", "facing_target_horizontally_percentage", "facing_target_vertically_percentage",
+    "moving_towards_target_percentage", "backing_towards_target_percentage", "standing_still_percentage",
+    "average_approach_per_second", "average_time_for_diver",
+    "min_time_for_diver", "max_time_for_diver"
+]
 
-print(results)
-'''
+def generate_latex_table(data1, data2, group1_name, group2_name):
+    arr1 = np.array([d for d in data1], dtype=float).T
+    arr2 = np.array([d for d in data2], dtype=float).T
 
-pass
+    table = []
+    table.append(f"\\begin{{table}}[H]\n\\centering\n\\resizebox{{\\textwidth}}{{!}}{{%")
+    table.append(f"\\begin{{tabular}}{{lrrrcc}}")
+    table.append(f"\\toprule")
+    table.append(f"Metric & {group1_name} Mean & {group2_name} Mean & t-stat & p-value & Result \\\\")
+    table.append(f"\\midrule")
+
+    for i, metric in enumerate(metric_names):
+        mean1 = np.mean(arr1[i])
+        mean2 = np.mean(arr2[i])
+        t_stat, p_value = ttest_ind(arr1[i], arr2[i], equal_var=False)
+
+        result = "REJECT" if p_value < 0.05 else "FAIL TO REJECT"
+        escaped_metric = metric.replace('_', ' ')
+        table.append(f"{escaped_metric[0].upper() + escaped_metric[1:]} & {mean1:.2f} & {mean2:.2f} & {t_stat:.2f} & {p_value:.4f} & {result} \\\\")
+
+    table.append(f"\\bottomrule")
+    table.append(f"\\end{{tabular}}%\n}}")
+    table.append(f"\\caption{{Comparison of {group1_name.replace('_', ' ')} and {group2_name.replace('_', ' ')}}}")
+    table.append(f"\\label{{tab:{group1_name.lower()}_{group2_name.lower()}_comparison}}")
+    table.append(f"\\end{{table}}\n")
+
+    return "\n".join(table)
+
+# Generate and print LaTeX tables for each group comparison
+#print(generate_latex_table(vip_data, sp_data, "VIP", "SP"))
+#print(generate_latex_table(vip_data, sp_ns_data, "VIP", "SP_NS"))
+#print(generate_latex_table(sp_data, sp_ns_data, "SP", "SP_NS"))
+
+naming["VIP"] = "Visually impaired player"
+naming["SP"] = "Sighted player"
+naming["SP_NS"] = "Sighted player (no screen)"
+
+def generate_group_data_table(data, group_name):
+    arr = np.array(data, dtype=float)  # shape: (num_players, num_metrics)
+    arr = arr.T  # Transpose to shape: (num_metrics, num_players)
+
+    # Define units for each metric
+    metric_units = {
+        "angle average": "°",
+        "angle std": "°",
+        "horizontal angle average": "°",
+        "horizontal angle std": "°",
+        "vertical angle average": "°",
+        "vertical angle std": "°",
+        "facing target percentage": "%",
+        "facing target horizontally percentage": "%",
+        "facing target vertically percentage": "%",
+        "moving towards target percentage": "%",
+        "backing towards target percentage": "%",
+        "standing still percentage": "%",
+        "average approach per second": "m/s",
+        "average time for diver": "s",
+        "min time for diver": "s",
+        "max time for diver": "s",
+    }
+
+    table = []
+    table.append(f"\\begin{{table}}[H]")
+    table.append(f"\\centering")
+    table.append(f"\\resizebox{{\\textwidth}}{{!}}{{%")
+    table.append(f"\\begin{{tabular}}{{l{'r' * arr.shape[1]}}}")
+    table.append(f"\\toprule")
+
+    # Header row: Metric & Player 1 & Player 2 ...
+    header = "Metric"
+    for i in range(arr.shape[1]):
+        header += f" & {group_name} {i+1}"
+    table.append(header + " \\\\")
+    table.append(f"\\midrule")
+
+    # Data rows: one per metric
+    for metric_name_raw, row in zip(metric_names, arr):
+        metric_name = metric_name_raw.replace('_', ' ').capitalize()
+        unit = metric_units.get(metric_name.lower(), "")
+        formatted_values = []
+
+        for val in row:
+            if unit == "%":
+                formatted_values.append(f"{val:.2f}\\%")
+            elif unit == "°":
+                formatted_values.append(f"{val:.2f}$^\\circ$")
+            elif unit == "s":
+                formatted_values.append(f"{val:.2f} \\,s")
+            elif unit == "m/s":
+                formatted_values.append(f"{val:.2f} \\,m/s")
+            else:
+                formatted_values.append(f"{val:.2f}")
+
+        row_str = f"{metric_name} & " + " & ".join(formatted_values) + " \\\\"
+        table.append(row_str)
+
+    table.append(f"\\bottomrule")
+    table.append(f"\\end{{tabular}}%")
+    table.append(f"}}")
+    table.append(f"\\caption{{Raw metric values for {naming[group_name]} (per metric)}}")
+    table.append(f"\\label{{tab:{group_name.lower()}_raw_data_transposed}}")
+    table.append(f"\\end{{table}}")
+
+    return "\n".join(table)
+
+#print(generate_group_data_table(vip_data, "VIP") + "\n")
+#print(generate_group_data_table(sp_data, "SP") + "\n")
+#print(generate_group_data_table(sp_ns_data, "SP_NS") + "\n")

@@ -1,7 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Developed by Jan Borecký, 2024-2025
+ * This script handles the compass in the cockpit of the submarine.
+ */
 public class Compass : MonoBehaviour
 {
     private Transform needlePoint;
