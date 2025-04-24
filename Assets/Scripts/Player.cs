@@ -13,13 +13,13 @@ using System.Globalization;
  */
 public class Player : MonoBehaviour
 {
-    private Vector3 testingDiverPos = new Vector3(212.271439f, 119.490868f, 219.693787f);
-    private Vector3 diver1Pos = new Vector3(281.881012f, 36.8699989f, 294.869995f);
-    private Vector3 diver2Pos = new Vector3(87.8600006f, 23.5f, 94.5f);
-    private Vector3 diver3Pos = new Vector3(50.2999992f, 40.2999992f, 442.5f);
-    private Vector3 diver4Pos = new Vector3(443.540009f, 39.0499992f, 90.5899963f);
-    private Vector3 diver5Pos = new Vector3(427.019989f, 60.6500015f, 438.25f);
-    private Vector3 basePos = new Vector3(207.893082f, 131.025192f, 187.043793f);
+    private Vector3 testingDiverPos = new(212.271439f, 119.490868f, 219.693787f);
+    private Vector3 diver1Pos = new(281.881012f, 36.8699989f, 294.869995f);
+    private Vector3 diver2Pos = new(87.8600006f, 23.5f, 94.5f);
+    private Vector3 diver3Pos = new(50.2999992f, 40.2999992f, 442.5f);
+    private Vector3 diver4Pos = new(443.540009f, 39.0499992f, 90.5899963f);
+    private Vector3 diver5Pos = new(427.019989f, 60.6500015f, 438.25f);
+    private Vector3 basePos = new(207.893082f, 131.025192f, 187.043793f);
 
     public readonly static Dictionary<string, List<int>> ordering = new()
     {
@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     private string fileName;
 
     [SerializeField]
-    private float currentAngle; // Used just for debugging purposed. Visible in the Inspector to check that the angle is calculated correctly.
+    private float currentAngle; // Used just for debugging purposes. Visible in the Inspector to check that the angle is calculated correctly.
 
     private float velocity;
     [Range(3, 15)]
