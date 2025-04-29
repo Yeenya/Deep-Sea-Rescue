@@ -10,8 +10,14 @@ import matplotlib as mpl
 from matplotlib.lines import Line2D
 from scipy.stats import ttest_ind
 
+'''
+Developed by Jan Borecký, 2024-2025
+This script is used to analyze the data gathered from Deep Sea Rescue replays and plot various results.
+'''
+
 mpl.rcParams['font.family'] = 'serif'
 
+# Dictionary used for naming replay files according to times. If no name change is required, this dictionary can be erased.
 naming = {}
 naming["11-02-2025_10-24-56_processed.csv"] = "VIP_1" #"Visually impaired player 1"
 naming["11-02-2025_10-24-56.csv"] = "VIP_1" #"Visually impaired player 1"
@@ -73,15 +79,16 @@ naming["17-04-2025_14-51-13_processed.csv"] = "SP_7" #"Sighted player 7"
 naming["17-04-2025_14-51-13.csv"] = "SP_7" #"Sighted player 7"
 naming["SP_7"] = "17-04-2025_14-51-13.csv"
 
+# Order of rescued divers for each playthrough. The numbers are indices of the positions_for_plot array.
 ordering = {}
 ordering["11-02-2025_10-24-56.csv"] = [0, 1, 5, 6]
-ordering["11-02-2025_11-43-22.csv"] = [0, 1, 5, 2, 6] #015 6 2
+ordering["11-02-2025_11-43-22.csv"] = [0, 1, 5, 2, 6]
 ordering["11-02-2025_13-52-54.csv"] = [0, 1, 2, 6]
 ordering["16-12-2024_14-07-40.csv"] = [0, 1, 6]
 ordering["19-12-2024_11-54-36.csv"] = [0, 1, 3, 2, 6]
-ordering["23-03-2025_21-33-31.csv"] = [0, 1, 5, 3, 2, 4, 6] #01532 6 46
+ordering["23-03-2025_21-33-31.csv"] = [0, 1, 5, 3, 2, 4, 6]
 ordering["25-03-2025_19-17-19.csv"] = [0, 1, 5, 2, 4, 3, 6]
-ordering["27-03-2025_10-15-21.csv"] = [0, 5, 1, 4, 2, 3, 6] #05142 6 36
+ordering["27-03-2025_10-15-21.csv"] = [0, 5, 1, 4, 2, 3, 6]
 ordering["28-03-2025_13-08-25.csv"] = [0, 1, 5, 2, 3, 6]
 ordering["03-04-2025_17-02-37.csv"] = [0, 2, 1, 6]
 ordering["03-04-2025_17-27-39.csv"] = [0, 1, 5, 2, 4, 3, 6]
@@ -90,6 +97,7 @@ ordering["17-04-2025_14-32-41.csv"] = [0, 1, 5, 5]
 ordering["17-04-2025_14-51-13.csv"] = [0, 1, 5, 2, 3, 4, 6]
 ordering["21-04-2025_19-31-35.csv"] = [0, 1, 5, 4, 2, 3, 6]
 
+# Hardcoded diver positions for now.
 diver_positions = np.array([
     [212.271439,119.490868,219.693787],
     [281.881012,36.8699989,294.869995],
@@ -100,9 +108,11 @@ diver_positions = np.array([
     ])
 diver_positions = np.transpose(diver_positions)
 
+# Hardcoded base position for now.
 base_position = np.array([207.893082,131.025192,187.043793])
 base_position = np.transpose(base_position)
 
+# Combined array of positions used for plotting.
 positions_for_plot = np.array([
     [212.271439,119.490868,219.693787],
     [281.881012,36.8699989,294.869995],
@@ -116,51 +126,53 @@ positions_for_plot = np.transpose(positions_for_plot)
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
-### Processed data:
-# Angle
-# Horizontal angle
-# Vertical angle
-# Distance to diver
-# Divers saved
+### Data structure:
+    ### Processed data:
+    # Angle
+    # Horizontal angle
+    # Vertical angle
+    # Distance to diver
+    # Divers saved
 
-### Data:
-# Position X, Y, Z
-# Distance traveled
-# Time
-# Submarine Rotation X, Y, Z, W
-# Camera Rotation X, Y, Z, W
-# Main Light On, Left Light On, Right Light On
-# Saved Divers
-# Electricity
+    ### Full data:
+    # Position X, Y, Z
+    # Distance traveled
+    # Time
+    # Submarine Rotation X, Y, Z, W
+    # Camera Rotation X, Y, Z, W
+    # Main Light On, Left Light On, Right Light On
+    # Saved Divers
+    # Electricity
 
+# Simple function to load CSV files into numpy arrays
 def load_csv_to_numpy(file_path):
     df = pd.read_csv(file_path, low_memory=False)
     data_array = df.to_numpy()
     return data_array.transpose()
 
-def euclidean(p1, p2):
-    return np.linalg.norm(p1 - p2)
-
+# Function to calculate the percentage of a value with given decimal numbers
 def calculate_percentage(value, num_values, decimals=2):
     value /= num_values
     value *= 100
     value = round(value, decimals)
     return value
 
+# Function to calculate the given value per second with given decimal numbers
 def calculate_per_second(value, num_values, values_gathered_per_second=50, decimals=2):
     value /= (num_values / values_gathered_per_second)
     value = round(value, decimals)
     return value
 
+# Function to plot the trajectory of one playthrough
 def plot_trajectory(data, name):
     fig = plt.figure() # param figsize=(15, 5)
     fig.set_size_inches(50, 30)
     ax = fig.add_subplot(121, projection='3d')
+
+    # The size of the world is 500x500x200
     ax.set_xlim([0, 500])
     ax.set_ylim([0, 500])
     ax.set_zlim([0, 200])
-
-    #ax.plot3D(data[0], data[2], data[1], color='blue', linewidth=2, label="Trajectory")
 
     # Compute the segments for the trajectory
     points = np.array([data[0], data[2], data[1]]).T  # Convert to (N, 3)
@@ -175,23 +187,25 @@ def plot_trajectory(data, name):
     line = Line3DCollection(segments, colors=colors, linewidth=3.5)
     ax.add_collection3d(line)  # Add trajectory to plot
 
+    # Plot the trajectory with a shaded line and points as base and diver positions
     ax.plot3D(data[0], data[2], 0, color='grey', linewidth=2, alpha=0.4, label='Shaded trajectory')
     ax.scatter3D(diver_positions[0], diver_positions[2], diver_positions[1], color='red', label='Divers', s=100)
     ax.scatter3D(base_position[0], base_position[2], base_position[1], color='saddlebrown', label='Base', s=150)
     ax.scatter3D(positions_for_plot[0], positions_for_plot[2], 0, color='grey', alpha=0.5)
-    #ax.set_title(naming[name.split('\\')[-1]] + " - Trajectory")
     ax.view_init(elev=45, azim=15)
 
+    # Labeling
     ax.set_xlabel('X Position (m)', labelpad=35)
     ax.set_ylabel('Z Position (m)', labelpad=30)
     ax.set_zlabel('Y Position (m)', labelpad=30)
     ax.tick_params(pad=10)
 
+    # Colorbar for distance measurement
     distances = np.array(data[3], dtype=float)
     norm = mcolors.Normalize(vmin=np.min(distances), vmax=np.max(distances))
     colors = cmap(norm(distances[:-1]))
     mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
-    mappable.set_array(distances)  # This will now work
+    mappable.set_array(distances)
     fig.colorbar(mappable, ax=ax, shrink=0.5, aspect=15, pad=0.1, label='Distance (m)')
     
     mid_val = (np.max(distances) + np.min(distances)) / 2
@@ -202,20 +216,21 @@ def plot_trajectory(data, name):
     labels.insert(0, "Trajectory")
 
     ax.legend(handles, labels, loc='upper right', bbox_to_anchor=(1.1, 1))
-    #plt.legend()
 
     plt.tight_layout()
     plt.savefig(naming[name.split('\\')[-1]] + "_T.png", bbox_inches='tight')
     plt.show()
 
+# Function to plot the angular differences of one playthrough from the data processed in Unity.
 def plot_angular_difference_unity(name):
     file = open(name, "r")
     file.readline()
-    #angular_data = [float(angle) for angle in file.readlines()]
     diver_indices = [0]
     angular_data = []
     distances = []
     counter = 0
+
+    # Load up the data per "time stamp" - every 0.02 seconds
     for time_stamp in file.readlines():
         separated_time_stamp = time_stamp.split(',')
         angular_data.append([float(separated_time_stamp[0]), float(separated_time_stamp[1]), float(separated_time_stamp[2])])
@@ -234,16 +249,17 @@ def plot_angular_difference_unity(name):
     angular_data = np.array(angular_data)
     angular_data = np.transpose(angular_data)
 
+    # Split the angular data to axes
     angles = angular_data[0]
     horizontal_angles = angular_data[1]
     vertical_angles = angular_data[2]
 
     plt.rcParams.update({'font.size': 34})
 
+    # Plot each path (from base / diver to another diver / base) separately
     for i in range(len(diver_indices) - 1):
         fig = plt.figure()
         fig.set_size_inches(60, 14)
-        #fig.suptitle(naming[name.split('\\')[-1]] + " - Path " + str(i + 1))
 
         ax = fig.add_subplot(131)
         ax.plot(time[0:diver_indices[i + 1] - diver_indices[i]], angles[diver_indices[i]:diver_indices[i + 1]], label="Angular Difference", color='b', linewidth=2)
@@ -281,6 +297,7 @@ def plot_angular_difference_unity(name):
         fig.legend(loc='lower center', bbox_to_anchor=(0.5, -0.05), ncol=2)
         plt.savefig(naming[name.split('\\')[-1]] + "_" + str(i + 1) + ".png", bbox_inches='tight')
 
+# Calculate empirical values for given data with a possibility to print values to a console or / and plot them.
 def calculate_values(name, data, processed_data, print_values=True, plot_values=True):
     data = np.transpose(data)
     processed_data = np.transpose(processed_data)
@@ -344,6 +361,8 @@ def calculate_values(name, data, processed_data, print_values=True, plot_values=
         ### Update helper variables
         last_distance_to_diver = distance_to_diver
         last_divers_saved = divers_saved
+    
+    ### Recalculate everything to correct units etc.
 
     angle_mean = round(np.mean(processed_data[:, 0]), 2)
     angle_std = round(np.std(processed_data[:, 0]), 2)
@@ -388,6 +407,7 @@ def calculate_values(name, data, processed_data, print_values=True, plot_values=
         print(f"Minimum time for diver: {min_time_for_diver} s")
         print(f"Maximum time for diver: {max_time_for_diver} s")
 
+    # Plotting angular difference distributions
     if plot_values:
         total_angles = np.sum(facing_target_curve)
         angular_diff_distribution = (facing_target_curve / total_angles) * 100
@@ -397,7 +417,6 @@ def calculate_values(name, data, processed_data, print_values=True, plot_values=
 
         fig = plt.figure(figsize=(25, 12))
         ax = fig.add_subplot(121)
-        #ax.plot(np.arange(len(angular_diff_distribution)), angular_diff_distribution, color='blue', linewidth=2, label='Percentage of time')
         bar_x = []
         bar_y = []
         for i in range(0, len(angular_diff_distribution) - 1, 30):
@@ -405,18 +424,14 @@ def calculate_values(name, data, processed_data, print_values=True, plot_values=
             bar_y.append(np.sum(angular_diff_distribution[i:i+30]))
         ax.bar(range(6), bar_y)
         ax.set_xticks(ticks=range(6), labels=bar_x, rotation=45, ha='center')
-        #ax2 = ax.twinx()
-        #ax2.plot(np.arange(len(percentage_facing_target)), percentage_facing_target, color='red', linewidth=2, label='Cumulative percentage')
-        #ax2.set_ylabel('Cumulative percentage (%)')
         ax.set_xlabel('Angle (degrees)')
         ax.set_ylabel('Percentage (%)')
         ax.set_title('Percentage of time angled towards target')
         ax.grid(True)
         fig.tight_layout()
         handles1, labels1 = ax.get_legend_handles_labels()
-        #handles2, labels2 = ax2.get_legend_handles_labels()
-        all_handles = handles1# + handles2
-        all_labels = labels1# + labels2
+        all_handles = handles1
+        all_labels = labels1
         fig.legend(
             all_handles, all_labels,
             loc='upper left',
@@ -444,6 +459,7 @@ txt_files = glob.glob(os.path.join(script_dir + "/processed_data", "*.txt"))
 
 plt.rcParams.update({'font.size': 28})
 
+# Uncomment and change the index of csv files to load a single playthrough
 #data = load_csv_to_numpy(csv_files[10])
 #plot_trajectory(data, os.path.basename(csv_files[10]))
 #plot_angular_difference_unity(processed_csv_files[10])
@@ -458,10 +474,10 @@ for i, file_path in enumerate(csv_files):
     data = data[:,1:]
     processed_data = load_csv_to_numpy(processed_csv_files[i])
 
-    #plot_trajectory(data, file_path)
-    #plot_angular_difference_unity(processed_csv_files[i])
+    #plot_trajectory(data, file_path) # Uncomment to plot the trajectory of the playthrough
+    #plot_angular_difference_unity(processed_csv_files[i]) # Uncomment to plot the angular difference graph of the playthrough
 
-    calculated_values = calculate_values(name, data, processed_data, print_values=True, plot_values=False)
+    calculated_values = calculate_values(name, data, processed_data, print_values=False, plot_values=False)
     if (name[0] == "V"):
         vip_data.append(calculated_values)
     elif (name[-1] == "S"):
@@ -469,13 +485,10 @@ for i, file_path in enumerate(csv_files):
     else:
         sp_data.append(calculated_values)
 
-
-avg_vip_time = np.average([player[14] for player in vip_data])
-
-avg_sp_ns_time = np.average([player[14] for player in sp_ns_data])
-
-avg_sp_time = np.average([player[14] for player in sp_data])
-
+# Uncomment to print the average time for each group
+#avg_vip_time = np.average([player[14] for player in vip_data])
+#avg_sp_ns_time = np.average([player[14] for player in sp_ns_data])
+#avg_sp_time = np.average([player[14] for player in sp_data])
 #print("Average time for VIP: ", avg_vip_time)
 #print("Average time for SP (no screen): ", avg_sp_ns_time)
 #print("Average time for SP: ", avg_sp_time)
@@ -486,10 +499,30 @@ metric_names = [
     "vertical_angle_average", "vertical_angle_std",
     "facing_target_percentage", "facing_target_horizontally_percentage", "facing_target_vertically_percentage",
     "moving_towards_target_percentage", "backing_towards_target_percentage", "standing_still_percentage",
-    "average_approach_per_second", "average_time_for_diver",
+    "average_approach_speed" , "average_time_for_diver",
     "min_time_for_diver", "max_time_for_diver"
 ]
 
+metric_units = {
+        "angle average": "°",
+        "angle std": "°",
+        "horizontal angle average": "°",
+        "horizontal angle std": "°",
+        "vertical angle average": "°",
+        "vertical angle std": "°",
+        "facing target percentage": "%",
+        "facing target horizontally percentage": "%",
+        "facing target vertically percentage": "%",
+        "moving towards target percentage": "%",
+        "backing towards target percentage": "%",
+        "standing still percentage": "%",
+        "average approach speed": "m/s",
+        "average time for diver": "s",
+        "min time for diver": "s",
+        "max time for diver": "s",
+    }
+
+# Function to generate LaTeX table for group comparison
 def generate_latex_table(data1, data2, group1_name, group2_name):
     arr1 = np.array([d for d in data1], dtype=float).T
     arr2 = np.array([d for d in data2], dtype=float).T
@@ -504,7 +537,7 @@ def generate_latex_table(data1, data2, group1_name, group2_name):
     for i, metric in enumerate(metric_names):
         mean1 = np.mean(arr1[i])
         mean2 = np.mean(arr2[i])
-        t_stat, p_value = ttest_ind(arr1[i], arr2[i], equal_var=False)
+        t_stat, p_value = ttest_ind(arr1[i], arr2[i], equal_var=False) # Welch's t-test
 
         result = "REJECT" if p_value < 0.05 else "FAIL TO REJECT"
         escaped_metric = metric.replace('_', ' ')
@@ -527,29 +560,10 @@ naming["VIP"] = "Visually impaired player"
 naming["SP"] = "Sighted player"
 naming["SP_NS"] = "Sighted player (no screen)"
 
+# Function to generate LaTeX table for single group data
 def generate_group_data_table(data, group_name):
-    arr = np.array(data, dtype=float)  # shape: (num_players, num_metrics)
-    arr = arr.T  # Transpose to shape: (num_metrics, num_players)
-
-    # Define units for each metric
-    metric_units = {
-        "angle average": "°",
-        "angle std": "°",
-        "horizontal angle average": "°",
-        "horizontal angle std": "°",
-        "vertical angle average": "°",
-        "vertical angle std": "°",
-        "facing target percentage": "%",
-        "facing target horizontally percentage": "%",
-        "facing target vertically percentage": "%",
-        "moving towards target percentage": "%",
-        "backing towards target percentage": "%",
-        "standing still percentage": "%",
-        "average approach per second": "m/s",
-        "average time for diver": "s",
-        "min time for diver": "s",
-        "max time for diver": "s",
-    }
+    arr = np.array(data, dtype=float)
+    arr = arr.T
 
     table = []
     table.append(f"\\begin{{table}}[H]")
@@ -558,7 +572,7 @@ def generate_group_data_table(data, group_name):
     table.append(f"\\begin{{tabular}}{{l{'r' * arr.shape[1]}}}")
     table.append(f"\\toprule")
 
-    # Header row: Metric & Player 1 & Player 2 ...
+    # Header row setting
     header = "Metric"
     for i in range(arr.shape[1]):
         header += f" & {group_name} {i+1}"
@@ -595,6 +609,44 @@ def generate_group_data_table(data, group_name):
 
     return "\n".join(table)
 
+# Uncomment to generate and print LaTeX tables for each group data
 #print(generate_group_data_table(vip_data, "VIP") + "\n")
 #print(generate_group_data_table(sp_data, "SP") + "\n")
 #print(generate_group_data_table(sp_ns_data, "SP_NS") + "\n")
+
+plt.rcParams.update({'font.size': 16})
+
+# Prepare data for violin plots
+vip_data_per_metric = np.transpose(vip_data)
+sp_data_per_metric = np.transpose(sp_data)
+sp_ns_data_per_metric = np.transpose(sp_ns_data)
+
+colors = ["#e6308a", "#89ce00", "#0073e6"] # Colors used for plotting violin plots
+
+for i, metric in enumerate(metric_names):
+    plt.figure(figsize=(5, 6))
+
+    parts = plt.violinplot(
+        [vip_data_per_metric[i], sp_data_per_metric[i], sp_ns_data_per_metric[i]],
+        showmeans=True,
+        showmedians=True
+    )
+
+    # Set colors for violins
+    for idx, body in enumerate(parts['bodies']):
+        body.set_facecolor(colors[idx])
+        body.set_alpha(0.75)
+        #body.set_edgecolor('black')
+
+    # Set color for means, medians, and bars (global)
+    for partname in parts:
+        if partname != 'bodies':
+            parts[partname].set_color((0.3, 0.3, 0.3))
+            parts[partname].set_linewidth(1.5)
+
+    plt.xlabel('Player type')
+    plt.ylabel(metric.replace('_', ' ').capitalize() + " (" + metric_units[metric.replace('_', ' ')] + ")")
+    plt.xticks([1, 2, 3], ['VIP', 'SP', 'SP NS'])
+    plt.savefig(str(i) + "_" + metric + ".png", bbox_inches='tight')
+
+plt.show()

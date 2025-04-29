@@ -4,36 +4,39 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams['font.family'] = 'serif'
 
-# Load the CSV
-df = pd.read_csv("feedback.csv")
+# Load the CSV file containing the feedback
+feedback = pd.read_csv("feedback.csv")
 
-# Set the respondent type column name (assumed to be the first)
-type_col = df.columns[0]
-question_cols = df.columns[1:]
+# Set the respondent type column name and question columns
+type_col = feedback.columns[0]
+question_cols = feedback.columns[1:]
 
-# Unique respondent types
-types = df[type_col].unique()
+# Ensure unique types and get them in the right format
+types = feedback[type_col].unique()
 
+# Set bar colors for player types
 colors = {
-    "Visually impaired player": "#b04c44",
-    "Sighted player": "#88a15b",
-    "Sighted player (monitor off)": "#4b7ba3"
+    "VIP": "#e6308a", #b04c44
+    "SP": "#89ce00", #88a15b
+    "SP NS": "#0073e6" #4b7ba3
 }
 
 averages = {t: [] for t in types}
 
 for question in question_cols:
+    # Set the correct rating scale
     used_rating_range = range(1, 6) if question == "6" else range(1, 7) 
-    # Prepare data: counts per type per rating
+    
+    # Process the data
     stacked_data = {t: [] for t in types}
     for rating in used_rating_range:
         for t in types:
-            count = df[(df[type_col] == t) & (df[question] == rating)].shape[0]
+            count = feedback[(feedback[type_col] == t) & (feedback[question] == rating)].shape[0]
             stacked_data[t].append(count)
 
     # Plot
     bottom = [0] * len(used_rating_range)
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(2.25, 3))
     for t in types:
         plt.bar(used_rating_range, stacked_data[t], label=t, bottom=bottom, color=colors[t])
         bottom = [sum(x) for x in zip(bottom, stacked_data[t])]
@@ -49,10 +52,11 @@ for question in question_cols:
 
     # Calculate averages per type for this question
     for t in types:
-        ratings = df[df[type_col] == t][question].dropna()
+        ratings = feedback[feedback[type_col] == t][question].dropna()
         avg = ratings.mean() if not ratings.empty else None
         averages[t].append(round(avg, 2))
 
+'''
 # Create LaTeX table grouped by question
 print("\\begin{table}[h!]")
 print("\\centering")
@@ -70,3 +74,4 @@ print("\\end{tabular}")
 print("\\caption{Average ratings per question by respondent type}")
 print("\\label{tab:avg_ratings}")
 print("\\end{table}")
+'''
